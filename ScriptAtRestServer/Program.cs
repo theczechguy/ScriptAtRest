@@ -21,6 +21,7 @@ namespace ScriptAtRestServer
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls(urls: "http://0.0.0.0:5000");
                 });
     }
 }
