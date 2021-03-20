@@ -15,47 +15,49 @@ namespace ScriptAtRestServer.Services
 
     public class ScriptExecutionService : IScriptExecutionService
     {
-        public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) {
-            return await Task.Run(() =>
+        public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
+        {
+            string processArgs = string.Empty;
+            switch (Type)
             {
-                string processArgs = string.Empty;
-                switch (Type)
+                case ScriptEnums.ScriptType.Shell:
+                    processArgs = $" {Name.TrimEnd()} {Parameters}";
+                    break;
+                case ScriptEnums.ScriptType.PowerShell:
+                    processArgs = $" -f {Name.TrimEnd()} {Parameters}";
+                    break;
+            }
+
+            Process process = CreateProcess(Type, processArgs);
+            process.Start();
+
+            string output = process.StandardOutput.ReadToEnd();
+            string errorOutput = process.StandardError.ReadToEnd();
+
+            process.WaitForExit();
+            process.Close();
+            return new ProcessModel
+            {
+                ExitCode = process.ExitCode,
+                Output = output,
+                ErrorOutput = errorOutput
+            };
+        });
+
+        private static Process CreateProcess(ScriptEnums.ScriptType Type, string processArgs)
+        {
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo
                 {
-                    case ScriptEnums.ScriptType.Shell:
-                        processArgs = $" {Name.TrimEnd()} {Parameters}";
-                        break;
-                    case ScriptEnums.ScriptType.PowerShell:
-                        processArgs = $" -f {Name.TrimEnd()} {Parameters}";
-                        break;
+                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
+                    Arguments = processArgs
                 }
-
-                using (Process process = new Process {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
-                        Arguments = processArgs
-                    }
-                })
-                {
-                    process.Start();
-
-                    var output = process.StandardOutput.ReadToEnd();
-                    var errorOutput = process.StandardError.ReadToEnd();
-
-                    process.WaitForExit();
-
-                    return new ProcessModel
-                    {
-                        ReturnCode = process.ExitCode,
-                        Output = output,
-                        ErrorOutput = errorOutput
-                    };
-                }
-            });
+            };
         }
     }
 }
