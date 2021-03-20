@@ -35,7 +35,7 @@ namespace ScriptAtRestServer.Services
             string errorOutput = process.StandardError.ReadToEnd();
 
             process.WaitForExit();
-            process.Close();
+
             return new ProcessModel
             {
                 ExitCode = process.ExitCode,
