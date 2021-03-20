@@ -23,7 +23,7 @@ namespace ScriptAtRestServer.Controllers
         public async Task<IActionResult> ExecuteScript(string Scriptname) {
             ProcessModel p = await _scriptExecutionService.RunScript(
                 ScriptEnums.ScriptType.PowerShell,
-                "Test.ps1",
+                Scriptname,
                 string.Empty
                 );
             return new ObjectResult(new
