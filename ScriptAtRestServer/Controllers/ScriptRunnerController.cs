@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ScriptAtRestServer.Services;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,16 @@ namespace ScriptAtRestServer.Controllers
     public class ScriptRunnerController : Controller
     {
         private IScriptExecutionService _scriptExecutionService;
+        private ILogger<ScriptRunnerController> _logger;
 
-        public ScriptRunnerController(IScriptExecutionService ScriptExecutionService) {
+        public ScriptRunnerController(IScriptExecutionService ScriptExecutionService, ILogger<ScriptRunnerController> Logger) {
             _scriptExecutionService = ScriptExecutionService;
+            _logger = Logger;
         }
 
         [HttpGet("run/{Scriptname}")]
         public async Task<IActionResult> ExecuteScript(string Scriptname) {
+            _logger.LogInformation("New request for: Run Script");
             ProcessModel p = await _scriptExecutionService.RunScript(
                 ScriptEnums.ScriptType.PowerShell,
                 Scriptname,
