@@ -28,7 +28,7 @@ namespace ScriptAtRestServer.Controllers
                 );
             return new ObjectResult(new
             {
-                ReturnCode = p.ReturnCode,
+                ExitCode = p.ExitCode,
                 Output = p.Output,
                 ErrorOutput = p.ErrorOutput
             });
