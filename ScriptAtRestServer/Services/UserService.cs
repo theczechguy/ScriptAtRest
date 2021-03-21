@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ScriptAtRestServer.Helpers;
 using ScriptAtRestServer.Entities;
 
@@ -11,6 +9,7 @@ namespace ScriptAtRestServer.Services
     {
         User Authenticate(string username, string password);
         IEnumerable<User> GetAll();
+        User Create(User user, string password);
     }
 
     public class UserService : IUserService
@@ -34,10 +33,9 @@ namespace ScriptAtRestServer.Services
                 return null;
             }
 
-            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt)) {
+            if (!PasswordHashHelpers.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt)) {
                 return null;
             }
-
 
             return user;
         }
@@ -47,23 +45,25 @@ namespace ScriptAtRestServer.Services
             return _context.Users;
         }
 
-        private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        public User Create(User user, string password)
         {
-            if (password == null) throw new ArgumentNullException("password");
-            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-            if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
-            if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
+            // validation
+            if (string.IsNullOrWhiteSpace(password))
+                throw new AppException("Password is required");
 
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
-                {
-                    if (computedHash[i] != storedHash[i]) return false;
-                }
-            }
+            if (_context.Users.Any(x => x.Username == user.Username))
+                throw new AppException("Username \"" + user.Username + "\" is already taken");
 
-            return true;
+            byte[] passwordHash, passwordSalt;
+            PasswordHashHelpers.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            return user;
         }
     }
 }
