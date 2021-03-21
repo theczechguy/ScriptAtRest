@@ -32,6 +32,7 @@ namespace ScriptAtRestServer
             services.AddDbContext<SqLiteDataContext>();
             services.AddCors();
             services.AddControllers();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddAuthentication("BasicAuthentication").
                 AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
