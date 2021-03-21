@@ -34,14 +34,29 @@ namespace ScriptAtRestServer.Services
             return Script;
         }
 
-        public void Update() { }
+        public void Update(Script Script) {
+            var script = _context.Scripts.Find(Script.Id);
+            if (script == null)
+            {
+                throw new AppException("Script not found");
+            }
+            script.Content = Script.Content;
+            script.Name = Script.Name;
+
+            _context.Scripts.Update(script);
+            _context.SaveChanges();
+        }
+
         public void Delete(string Name) {
             var script = _context.Scripts.Find(Name);
-            if (script != null)
+
+            if (script == null)
             {
-                _context.Scripts.Remove(script);
-                _context.SaveChanges();
+                throw new AppException("Script not found");
             }
+
+            _context.Scripts.Remove(script);
+            _context.SaveChanges();
         }
 
         public IEnumerable<Script> GetAll()
