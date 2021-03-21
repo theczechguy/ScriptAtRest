@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace ScriptAtRestServer.Models
+namespace ScriptAtRestServer.Models.Users
 {
     public class AuthenticateModel
     {
