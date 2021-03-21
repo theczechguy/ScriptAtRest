@@ -34,6 +34,16 @@ namespace ScriptAtRestServer.Services
             return Script;
         }
 
+        public void Update() { }
+        public void Delete(string Name) {
+            var script = _context.Scripts.Find(Name);
+            if (script != null)
+            {
+                _context.Scripts.Remove(script);
+                _context.SaveChanges();
+            }
+        }
+
         public IEnumerable<Script> GetAll()
         {
             return _context.Scripts;
