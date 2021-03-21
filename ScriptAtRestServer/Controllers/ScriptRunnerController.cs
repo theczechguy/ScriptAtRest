@@ -30,6 +30,7 @@ namespace ScriptAtRestServer.Controllers
                 Scriptname,
                 string.Empty
                 );
+            _logger.LogInformation("Script exit code : {ExitCode}", p.ExitCode);
             return new ObjectResult(new
             {
                 ExitCode = p.ExitCode,
