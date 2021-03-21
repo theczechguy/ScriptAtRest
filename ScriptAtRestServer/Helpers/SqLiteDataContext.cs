@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using ScriptAtRestServer.Entities;
 
-namespace ScriptAtRestServer.Controllers
+namespace ScriptAtRestServer.Helpers
 {
     public class SqLiteDataContext : DbContext
     {
