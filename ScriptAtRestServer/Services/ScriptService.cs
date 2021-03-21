@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ScriptAtRestServer.Services
 {
