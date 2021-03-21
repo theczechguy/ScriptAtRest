@@ -16,6 +16,23 @@ namespace ScriptAtRestServer.Migrations.SqliteMigrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.4");
 
+            modelBuilder.Entity("ScriptAtRestServer.Entities.Script", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Scripts");
+                });
+
             modelBuilder.Entity("ScriptAtRestServer.Entities.User", b =>
                 {
                     b.Property<int>("Id")
