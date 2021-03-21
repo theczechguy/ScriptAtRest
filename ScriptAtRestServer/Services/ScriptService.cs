@@ -9,7 +9,8 @@ namespace ScriptAtRestServer.Services
 {
 
     public interface IScriptService {
-        Script Create(string Name , string Content);
+        Script Create(Script Script);
+        IEnumerable<Script> GetAll();
     }
     public class ScriptService : IScriptService
     {
@@ -18,9 +19,22 @@ namespace ScriptAtRestServer.Services
         {
             _context = Context;
         }
-        public Script Create(string Name , string Content)
+        public Script Create(Script Script)
         {
-            throw new NotImplementedException();
+            if (_context.Scripts.Any(x => x.Name == x.Name))
+            {
+                throw new AppException("Scriptname is already taken");
+            }
+
+            _context.Scripts.Add(Script);
+            _context.SaveChanges();
+
+            return Script;
+        }
+
+        public IEnumerable<Script> GetAll()
+        {
+            return _context.Scripts;
         }
     }
 }
