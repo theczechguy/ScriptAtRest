@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ScriptAtRestServer.Helpers;
 using ScriptAtRestServer.Entities;
 
@@ -9,33 +7,63 @@ namespace ScriptAtRestServer.Services
 {
     public interface IUserService
     {
-        Task<User> Authenticate(string username, string password);
-        Task<IEnumerable<User>> GetAll();
+        User Authenticate(string username, string password);
+        IEnumerable<User> GetAll();
+        User Create(User user, string password);
     }
 
     public class UserService : IUserService
     {
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
-        };
-
-        public async Task<User> Authenticate(string username, string password)
-        {
-            var user = await Task.Run(() => _users.SingleOrDefault(x => x.Username == username && x.Password == password));
-
-            // return null if user not found
-            if (user == null)
-                return null;
-
-            // authentication successful so return user details without password
-            return user.WithoutPassword();
+        private SqLiteDataContext _context;
+        public UserService(SqLiteDataContext Context) {
+            _context = Context;
         }
 
-        public async Task<IEnumerable<User>> GetAll()
+        public User Authenticate(string username, string password)
         {
-            return await Task.Run(() => _users.WithoutPasswords());
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            var user = _context.Users.SingleOrDefault(x => x.Username == username);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            if (!PasswordHashHelpers.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt)) {
+                return null;
+            }
+
+            return user;
+        }
+
+        public IEnumerable<User> GetAll()
+        {
+            return _context.Users;
+        }
+
+        public User Create(User user, string password)
+        {
+            // validation
+            if (string.IsNullOrWhiteSpace(password))
+                throw new AppException("Password is required");
+
+            if (_context.Users.Any(x => x.Username == user.Username))
+                throw new AppException("Username \"" + user.Username + "\" is already taken");
+
+            byte[] passwordHash, passwordSalt;
+            PasswordHashHelpers.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            return user;
         }
     }
 }

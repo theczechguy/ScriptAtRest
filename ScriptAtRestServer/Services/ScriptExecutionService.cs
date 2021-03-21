@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using ScriptAtRestServer.Enums;
 
 namespace ScriptAtRestServer.Services
 {
