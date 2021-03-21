@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace ScriptAtRestServer
 {
@@ -42,6 +43,8 @@ namespace ScriptAtRestServer
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
+
+            app.UseSerilogRequestLogging();
 
             // global cors policy
             app.UseCors(x => x

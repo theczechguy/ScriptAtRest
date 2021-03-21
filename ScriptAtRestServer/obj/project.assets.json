@@ -3773,7 +3773,8 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Serilog.AspNetCore >= 4.0.0"
+      "Serilog.AspNetCore >= 4.0.0",
+      "Serilog.Sinks.Console >= 3.1.1"
     ]
   },
   "packageFolders": {
@@ -3818,6 +3819,10 @@
           "Serilog.AspNetCore": {
             "target": "Package",
             "version": "[4.0.0, )"
+          },
+          "Serilog.Sinks.Console": {
+            "target": "Package",
+            "version": "[3.1.1, )"
           }
         },
         "imports": [
