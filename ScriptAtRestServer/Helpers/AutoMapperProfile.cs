@@ -11,8 +11,10 @@ namespace WebApi.Helpers
         {
             CreateMap<User, UserModel>();
             CreateMap<RegisterModel, User>();
-            CreateMap<ScriptModel, Script>();
+
             CreateMap<Script, ScriptModel>();
+            CreateMap<ScriptModel, Script>();
+            CreateMap<RegisterScriptModel, Script>();
         }
     }
 }
