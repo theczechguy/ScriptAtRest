@@ -19,14 +19,47 @@ namespace ScriptAtRestServer.Services
     public class ScriptExecutionService : IScriptExecutionService
     {
 
-        public async Task<ProcessModel> RunScriptById(Script Script) => await Task.Run(() =>
+        public async Task<ProcessModel> RunScriptById(Script Script)
         {
-            //load script content
-            //decide script type -> script suffix
-            //save script content to temporary file
-            //execute
-            return new ProcessModel { };
-        });
+            return await Task.Run(() =>
+            {
+                //load script content
+                string scriptContent = Script.Content;
+                //decide script type -> script suffix
+                ScriptEnums.ScriptType scriptType = Script.Type;
+
+                string scriptSuffix = string.Empty;
+                switch (scriptType)
+                {
+                    case ScriptEnums.ScriptType.Shell:
+                        scriptSuffix = ".cmd";
+                        break;
+                    case ScriptEnums.ScriptType.PowerShell:
+                        scriptSuffix = ".ps1";
+                        break;
+                    default:
+                        scriptSuffix = ".cmd";
+                        break;
+                }
+
+                //save script content to temporary file
+                //this automatically creates temporary empty file with unique name and returns file path
+                string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+
+
+                //execute
+                return new ProcessModel { };
+            });
+        }
+
+        private static string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
+        {
+            string tempFilePath = Path.GetTempFileName();
+            tempFilePath = Path.ChangeExtension(tempFilePath, ScriptSuffix);
+            File.WriteAllText(tempFilePath, ScriptContent);
+            return tempFilePath;
+        }
+
         public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
         {
             string processArgs = string.Empty;
