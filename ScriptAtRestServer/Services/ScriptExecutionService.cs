@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
 
 namespace ScriptAtRestServer.Services
@@ -12,6 +13,7 @@ namespace ScriptAtRestServer.Services
     public interface IScriptExecutionService
     {
         Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
+        Task<ProcessModel> RunScriptById(Script Script);
     };
 
     public class ScriptExecutionService : IScriptExecutionService
@@ -59,6 +61,11 @@ namespace ScriptAtRestServer.Services
                     Arguments = processArgs
                 }
             };
+        }
+
+        public Task<ProcessModel> RunScriptById(Script Script)
+        {
+            throw new NotImplementedException();
         }
     }
 }
