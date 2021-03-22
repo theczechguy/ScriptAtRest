@@ -56,5 +56,12 @@ namespace ScriptAtRestServer.Controllers
             var model = _mapper.Map<IList<UserModel>>(users);
             return Ok(model);
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int Id) 
+        {
+            _userService.Delete(Id);
+            return Ok();
+        }
     }
 }

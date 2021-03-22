@@ -20,5 +20,6 @@ namespace ScriptAtRestServer.Helpers
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Script> Scripts { get; set; }
     }
 }
