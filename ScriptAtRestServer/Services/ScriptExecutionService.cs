@@ -18,6 +18,15 @@ namespace ScriptAtRestServer.Services
 
     public class ScriptExecutionService : IScriptExecutionService
     {
+
+        public async Task<ProcessModel> RunScriptById(Script Script) => await Task.Run(() =>
+        {
+            //load script content
+            //decide script type -> script suffix
+            //save script content to temporary file
+            //execute
+            return new ProcessModel { };
+        });
         public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
         {
             string processArgs = string.Empty;
@@ -61,11 +70,6 @@ namespace ScriptAtRestServer.Services
                     Arguments = processArgs
                 }
             };
-        }
-
-        public Task<ProcessModel> RunScriptById(Script Script)
-        {
-            throw new NotImplementedException();
         }
     }
 }
