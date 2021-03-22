@@ -23,7 +23,7 @@ namespace ScriptAtRestServer.Services
         }
         public Script Create(Script Script)
         {
-            if (_context.Scripts.Any(x => x.Name == x.Name))
+            if (_context.Scripts.Any(x => x.Name == Script.Name))
             {
                 throw new AppException("Scriptname is already taken");
             }
