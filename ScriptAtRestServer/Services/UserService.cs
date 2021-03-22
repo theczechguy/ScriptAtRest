@@ -10,6 +10,7 @@ namespace ScriptAtRestServer.Services
         User Authenticate(string username, string password);
         IEnumerable<User> GetAll();
         User Create(User user, string password);
+        void Delete(int id);
     }
 
     public class UserService : IUserService
@@ -64,6 +65,16 @@ namespace ScriptAtRestServer.Services
             _context.SaveChanges();
 
             return user;
+        }
+
+        public void Delete(int Id)
+        {
+            User user = _context.Users.Find(Id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                _context.SaveChanges();
+            }
         }
     }
 }
