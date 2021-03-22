@@ -16,7 +16,7 @@ namespace ScriptAtRestServer.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("script")]
+    [Route("scripts")]
     public class ScriptController : Controller
     {
         private IScriptService _scriptService;
@@ -34,7 +34,7 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] ScriptModel model) {
+        public IActionResult Register([FromBody] RegisterScriptModel model) {
             Script script = _mapper.Map<Script>(model);
             try
             {
@@ -52,6 +52,19 @@ namespace ScriptAtRestServer.Controllers
             var scripts = _scriptService.GetAll();
             var model = _mapper.Map<IList<ScriptModel>>(scripts);
             return Ok(model);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int Id) {
+            var script = _scriptService.GetById(Id);
+            var model = _mapper.Map<ScriptModel>(script);
+            return Ok(model);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int Id) {
+            _scriptService.Delete(Id);
+            return Ok();
         }
     }
 }
