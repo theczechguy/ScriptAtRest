@@ -104,5 +104,21 @@ namespace ScriptAtRestServer.Services
                 }
             };
         }
+
+        private static Process CreateProcess(string processArgs)
+        {
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
+                    Arguments = processArgs
+                }
+            };
+        }
     }
 }
