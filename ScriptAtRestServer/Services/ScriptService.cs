@@ -13,6 +13,8 @@ namespace ScriptAtRestServer.Services
     public interface IScriptService {
         Script Create(Script Script);
         IEnumerable<Script> GetAll();
+        Script GetById(int id);
+        void Delete(int id);
     }
     public class ScriptService : IScriptService
     {
@@ -62,6 +64,20 @@ namespace ScriptAtRestServer.Services
         public IEnumerable<Script> GetAll()
         {
             return _context.Scripts;
+        }
+
+        public Script GetById(int Id) {
+            return _context.Scripts.Find(Id);
+        }
+
+        public void Delete(int Id)
+        {
+            Script script = _context.Scripts.Find(Id);
+            if (script != null)
+            {
+                _context.Scripts.Remove(script);
+                _context.SaveChanges();
+            }
         }
     }
 }
