@@ -22,7 +22,7 @@ namespace ScriptAtRestServer.Controllers
         [HttpGet("Alive")]
         public IActionResult Alive()
         {
-            _logger.LogInformation("New request for: Healthcheck");
+            _logger.LogInformation("Get healthcheck response");
             return Ok(new
             {
                 Answer = "I'm Alive",

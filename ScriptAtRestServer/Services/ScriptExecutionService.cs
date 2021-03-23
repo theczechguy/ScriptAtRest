@@ -5,17 +5,89 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
+using ScriptAtRestServer.Helpers;
 
 namespace ScriptAtRestServer.Services
 {
     public interface IScriptExecutionService
     {
         Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
+        Task<ProcessModel> RunScriptById(int id);
     };
 
     public class ScriptExecutionService : IScriptExecutionService
     {
+        private SqLiteDataContext _context;
+        public ScriptExecutionService(SqLiteDataContext Context) {
+            _context = Context;
+        }
+
+        public async Task<ProcessModel> RunScriptById(int id)
+        {
+            return await Task.Run(() =>
+            {
+                Script script = _context.Scripts.Find(id);
+                
+                string scriptContent = script.Content;
+                ScriptEnums.ScriptType scriptType = script.Type;
+
+                string scriptSuffix = string.Empty;
+                string fileName = string.Empty;
+
+                switch (scriptType)
+                {
+                    case ScriptEnums.ScriptType.PowerShell:
+                        scriptSuffix = ".ps1";
+                        fileName = "powershell.exe";
+                        break;
+                    default:
+                        scriptSuffix = ".cmd";
+                        fileName = "cmd.exe";
+                        break;
+                }
+
+                //save script content to temporary file
+                //this automatically creates temporary empty file with unique name and returns file path
+                string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+                string processArgs = string.Empty;
+
+                switch (scriptType)
+                {
+                    case ScriptEnums.ScriptType.Shell:
+                        processArgs = $" {scriptFilePath}";
+                        break;
+                    case ScriptEnums.ScriptType.PowerShell:
+                        processArgs = $" -f {scriptFilePath}";
+                        break;
+                }
+
+                Process process = CreateProcess(processArgs, fileName);
+                process.Start();
+
+                string output = process.StandardOutput.ReadToEnd();
+                string errorOutput = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                return new ProcessModel
+                {
+                    ExitCode = process.ExitCode,
+                    Output = output,
+                    ErrorOutput = errorOutput
+                };
+            });
+        }
+
+        private static string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
+        {
+            string tempFilePath = Path.GetTempFileName();
+            tempFilePath = Path.ChangeExtension(tempFilePath, ScriptSuffix);
+            File.WriteAllText(tempFilePath, ScriptContent);
+            return tempFilePath;
+        }
+
         public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
         {
             string processArgs = string.Empty;
@@ -56,6 +128,22 @@ namespace ScriptAtRestServer.Services
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
+                    Arguments = processArgs
+                }
+            };
+        }
+
+        private static Process CreateProcess(string processArgs , string fileName)
+        {
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    FileName = fileName,
                     Arguments = processArgs
                 }
             };
