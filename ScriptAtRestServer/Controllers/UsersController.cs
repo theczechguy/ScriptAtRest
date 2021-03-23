@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Users;
+using Microsoft.Extensions.Logging;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -20,19 +21,23 @@ namespace ScriptAtRestServer.Controllers
     {
         private IUserService _userService;
         private IMapper _mapper;
+        private ILogger<UsersController> _logger;
 
         public UsersController(
             IUserService userService,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<UsersController> Logger)
         {
             _userService = userService;
             _mapper = mapper;
+            _logger = Logger;
         }
 
         [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register([FromBody]RegisterModel model)
         {
+            _logger.LogInformation("Register new user with username : {username}" , model.Username);
             // map model to entity
             var user = _mapper.Map<User>(model);
 
@@ -40,11 +45,13 @@ namespace ScriptAtRestServer.Controllers
             {
                 // create user
                 _userService.Create(user, model.Password);
+                _logger.LogInformation("User registered");
                 return Ok();
             }
             catch (AppException ex)
             {
                 // return error message if there was an exception
+                _logger.LogError(ex , "Failed to register new user");
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -52,14 +59,16 @@ namespace ScriptAtRestServer.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
+            _logger.LogInformation("Get all users");
             var users = _userService.GetAll();
             var model = _mapper.Map<IList<UserModel>>(users);
             return Ok(model);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int Id) 
+        public IActionResult Delete(int Id)
         {
+            _logger.LogInformation("Delete user with id : {userid}" , Id);
             _userService.Delete(Id);
             return Ok();
         }

@@ -41,12 +41,13 @@ namespace ScriptAtRestServer.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterScriptModel model) {
             _logger.LogInformation("Register new script");
-            _logger.LogDebug("{@registerScriptModel}" , model);
+            _logger.LogInformation("{@registerScriptModel}" , model);
+
             Script script = _mapper.Map<Script>(model);
             try
             {
                 Script createdScript = _scriptService.Create(script);
-                _logger.LogInformation("Script registered with id : @{scriptId}" , createdScript.Id);
+                _logger.LogInformation("Script registered with id : {scriptId}" , createdScript.Id);
                 return Ok();
             }
             catch (AppException ex)
@@ -61,22 +62,22 @@ namespace ScriptAtRestServer.Controllers
             _logger.LogInformation("Get all scripts");
             var scripts = _scriptService.GetAll();
             var model = _mapper.Map<IList<ScriptModel>>(scripts);
-            _logger.LogDebug("Scripts retrieved : @{scriptCount}" , model.Count);
+            _logger.LogInformation("Scripts retrieved : {scriptCount}" , model.Count);
             return Ok(model);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int Id) {
-            _logger.LogInformation("Get Script with id : @{scriptid}" , Id);
+            _logger.LogInformation("Get Script with id : {scriptid}" , Id);
             var script = _scriptService.GetById(Id);
             var model = _mapper.Map<ScriptModel>(script);
-            _logger.LogDebug("Retrieved script : @{script}" , script);
+            _logger.LogInformation("Retrieved script : {scriptName}" , model.Name);
             return Ok(model);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int Id) {
-            _logger.LogInformation("Delete script with ID : @{scriptid}" , Id);
+            _logger.LogInformation("Delete script with ID : {scriptid}" , Id);
             _scriptService.Delete(Id);
             return Ok();
         }
@@ -84,10 +85,8 @@ namespace ScriptAtRestServer.Controllers
         [HttpPost("run/{id}")]
         public async Task<IActionResult> ExecuteScriptById(int Id)
         {
-            _logger.LogInformation("Run script with ID : @{scriptid}" , Id);
+            _logger.LogInformation("Run script with ID : {scriptid}" , Id);
             ProcessModel p = await _scriptExecutionService.RunScriptById(Id);
-            _logger.LogInformation("Script exit code : {ExitCode}", p.ExitCode);
-            _logger.LogDebug("Script result : @{processModel}" , p);
 
             return Ok(p);
         }
