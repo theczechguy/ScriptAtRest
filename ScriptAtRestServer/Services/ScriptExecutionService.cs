@@ -7,29 +7,35 @@ using System.Reflection;
 using System.Threading.Tasks;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
+using ScriptAtRestServer.Helpers;
 
 namespace ScriptAtRestServer.Services
 {
     public interface IScriptExecutionService
     {
         Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
-        Task<ProcessModel> RunScriptById(Script Script);
+        Task<ProcessModel> RunScriptById(int id);
     };
 
     public class ScriptExecutionService : IScriptExecutionService
     {
+        private SqLiteDataContext _context;
+        public ScriptExecutionService(SqLiteDataContext Context) {
+            _context = Context;
+        }
 
-        public async Task<ProcessModel> RunScriptById(Script Script)
+        public async Task<ProcessModel> RunScriptById(int id)
         {
             return await Task.Run(() =>
             {
-                //load script content
-                string scriptContent = Script.Content;
-                //decide script type -> script suffix
-                ScriptEnums.ScriptType scriptType = Script.Type;
+                Script script = _context.Scripts.Find(id);
+                
+                string scriptContent = script.Content;
+                ScriptEnums.ScriptType scriptType = script.Type;
 
                 string scriptSuffix = string.Empty;
                 string fileName = string.Empty;
+
                 switch (scriptType)
                 {
                     case ScriptEnums.ScriptType.PowerShell:
