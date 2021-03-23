@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using ScriptAtRestServer.Helpers;
-using Microsoft.Extensions.Options;
-using System.Text;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using ScriptAtRestServer.Enums;
 
 namespace ScriptAtRestServer.Controllers
 {
