@@ -11,6 +11,8 @@ using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using ScriptAtRestServer.Enums;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -22,15 +24,18 @@ namespace ScriptAtRestServer.Controllers
         private IScriptService _scriptService;
         private ILogger<ScriptController> _logger;
         private IMapper _mapper;
+        private IScriptExecutionService _scriptExecutionService;
 
         public ScriptController(
             IScriptService ScriptService,
             ILogger<ScriptController> Logger,
-            IMapper Mapper
+            IMapper Mapper,
+            IScriptExecutionService ScriptExecutionService
         ) {
             _scriptService = ScriptService;
             _logger = Logger;
             _mapper = Mapper;
+            _scriptExecutionService = ScriptExecutionService;
         }
 
         [HttpPost("register")]
@@ -65,6 +70,38 @@ namespace ScriptAtRestServer.Controllers
         public IActionResult Delete(int Id) {
             _scriptService.Delete(Id);
             return Ok();
+        }
+
+        [HttpGet("run/{Scriptname}")]
+        public async Task<IActionResult> ExecuteScript(string Scriptname)
+        {
+            _logger.LogInformation("New request for: Run Script");
+            ProcessModel p = await _scriptExecutionService.RunScript(
+                ScriptEnums.ScriptType.PowerShell,
+                Scriptname,
+                string.Empty
+                );
+            _logger.LogInformation("Script exit code : {ExitCode}", p.ExitCode);
+            return new ObjectResult(new
+            {
+                ExitCode = p.ExitCode,
+                Output = p.Output,
+                ErrorOutput = p.ErrorOutput
+            });
+        }
+
+        [HttpPost("run/{id}")]
+        public async Task<IActionResult> ExecuteScriptById(int id)
+        {
+            _logger.LogInformation("New request for: Run Script by ID");
+            ProcessModel p = await _scriptExecutionService.RunScriptById(id);
+            _logger.LogInformation("Script exit code : {ExitCode}", p.ExitCode);
+            return new ObjectResult(new
+            {
+                ExitCode = p.ExitCode,
+                Output = p.Output,
+                ErrorOutput = p.ErrorOutput
+            });
         }
     }
 }
