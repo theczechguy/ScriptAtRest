@@ -41,8 +41,9 @@ namespace ScriptAtRestServer.Controllers
             {
                 Script script = _mapper.Map<Script>(model);
                 Script createdScript = _scriptService.Create(script);
+                ScriptModel scriptModel = _mapper.Map<ScriptModel>(createdScript);
                 _logger.LogInformation("Script registered with id : {scriptId}" , createdScript.Id);
-                return Ok();
+                return Ok(scriptModel);
             }
             catch (AppException ex)
             {
