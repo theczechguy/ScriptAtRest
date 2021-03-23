@@ -29,26 +29,48 @@ namespace ScriptAtRestServer.Services
                 ScriptEnums.ScriptType scriptType = Script.Type;
 
                 string scriptSuffix = string.Empty;
+                string fileName = string.Empty;
                 switch (scriptType)
                 {
-                    case ScriptEnums.ScriptType.Shell:
-                        scriptSuffix = ".cmd";
-                        break;
                     case ScriptEnums.ScriptType.PowerShell:
                         scriptSuffix = ".ps1";
+                        fileName = "powershell.exe";
                         break;
                     default:
                         scriptSuffix = ".cmd";
+                        fileName = "cmd.exe";
                         break;
                 }
 
                 //save script content to temporary file
                 //this automatically creates temporary empty file with unique name and returns file path
                 string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+                string processArgs = string.Empty;
 
+                switch (scriptType)
+                {
+                    case ScriptEnums.ScriptType.Shell:
+                        processArgs = $" {scriptFilePath}";
+                        break;
+                    case ScriptEnums.ScriptType.PowerShell:
+                        processArgs = $" -f {scriptFilePath}";
+                        break;
+                }
 
-                //execute
-                return new ProcessModel { };
+                Process process = CreateProcess(processArgs, fileName);
+                process.Start();
+
+                string output = process.StandardOutput.ReadToEnd();
+                string errorOutput = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                return new ProcessModel
+                {
+                    ExitCode = process.ExitCode,
+                    Output = output,
+                    ErrorOutput = errorOutput
+                };
             });
         }
 
@@ -105,7 +127,7 @@ namespace ScriptAtRestServer.Services
             };
         }
 
-        private static Process CreateProcess(string processArgs)
+        private static Process CreateProcess(string processArgs , string fileName)
         {
             return new Process
             {
@@ -115,7 +137,7 @@ namespace ScriptAtRestServer.Services
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
+                    FileName = fileName,
                     Arguments = processArgs
                 }
             };
