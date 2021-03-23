@@ -12,7 +12,7 @@ namespace ScriptAtRestServer.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("script")]
+    [Route("scripts")]
     public class ScriptRunnerController : Controller
     {
         private IScriptExecutionService _scriptExecutionService;
