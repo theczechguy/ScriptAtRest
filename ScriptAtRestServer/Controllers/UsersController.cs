@@ -60,17 +60,34 @@ namespace ScriptAtRestServer.Controllers
         public IActionResult GetAll()
         {
             _logger.LogInformation("Get all users");
-            var users = _userService.GetAll();
-            var model = _mapper.Map<IList<UserModel>>(users);
-            return Ok(model);
+            try
+            {
+                var users = _userService.GetAll();
+                var model = _mapper.Map<IList<UserModel>>(users);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                _logger.LogError(ex , "Failed to get users");
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int Id)
         {
             _logger.LogInformation("Delete user with id : {userid}" , Id);
-            _userService.Delete(Id);
-            return Ok();
+            try
+            {
+                _userService.Delete(Id);
+                _logger.LogInformation("User deleted");
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                _logger.LogError(ex, "Failed to delete user");
+                return BadRequest(new { message = ex.Message });
+            }            
         }
     }
 }
