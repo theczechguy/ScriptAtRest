@@ -17,9 +17,9 @@ namespace ScriptAtRestServer.Controllers
     public class ScriptController : Controller
     {
         private IScriptService _scriptService;
+        private IScriptExecutionService _scriptExecutionService;
         private ILogger<ScriptController> _logger;
         private IMapper _mapper;
-        private IScriptExecutionService _scriptExecutionService;
 
         public ScriptController(
             IScriptService ScriptService,
@@ -28,9 +28,9 @@ namespace ScriptAtRestServer.Controllers
             IScriptExecutionService ScriptExecutionService
         ) {
             _scriptService = ScriptService;
+            _scriptExecutionService = ScriptExecutionService;
             _logger = Logger;
             _mapper = Mapper;
-            _scriptExecutionService = ScriptExecutionService;
         }
 
         [HttpPost("register")]
