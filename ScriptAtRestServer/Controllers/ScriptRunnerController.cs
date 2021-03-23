@@ -39,5 +39,18 @@ namespace ScriptAtRestServer.Controllers
                 ErrorOutput = p.ErrorOutput
             });
         }
+
+        [HttpPost("run/{id}")]
+        public async Task<IActionResult> ExecuteScriptById(int id) {
+            _logger.LogInformation("New request for: Run Script by ID");
+            ProcessModel p = await _scriptExecutionService.RunScriptById(id);
+            _logger.LogInformation("Script exit code : {ExitCode}", p.ExitCode);
+            return new ObjectResult(new
+            {
+                ExitCode = p.ExitCode,
+                Output = p.Output,
+                ErrorOutput = p.ErrorOutput
+            });
+        }
     }
 }
