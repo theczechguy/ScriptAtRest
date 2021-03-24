@@ -19,7 +19,7 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("Alive")]
+        [HttpGet]
         public IActionResult Alive()
         {
             _logger.LogInformation("Get healthcheck response");
