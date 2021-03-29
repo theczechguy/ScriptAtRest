@@ -70,12 +70,10 @@ namespace ScriptAtRestServer.Services
                 
             SelectScriptDetails(scriptType, out string scriptSuffix, out string fileName);
 
-            //save script content to temporary file
-            //this automatically creates temporary empty file with unique name and returns file path
             string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
 
-            Process process = await CreateProcessAsync(processArgs, fileName);
+            Process process = await StartProcessAsync(processArgs, fileName);
             string output = process.StandardOutput.ReadToEnd();
             string errorOutput = process.StandardError.ReadToEnd();
 
@@ -154,7 +152,7 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
-        private static async Task<Process> CreateProcessAsync(string processArgs , string fileName)
+        private static async Task<Process> StartProcessAsync(string processArgs , string fileName)
         {
             return await Task.Run(() =>
             {
