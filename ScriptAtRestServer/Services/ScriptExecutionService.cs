@@ -62,8 +62,6 @@ namespace ScriptAtRestServer.Services
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
         {
-            return await Task.Run(() =>
-            {
                 Script script = _context.Scripts.Find(id);
 
                 string scriptContent = script.Content;
@@ -77,7 +75,7 @@ namespace ScriptAtRestServer.Services
                 string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
                 string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
 
-                Process process = CreateProcess(processArgs, fileName);
+                Process process = await CreateProcessAsync(processArgs, fileName);
                 process.Start();
 
                 string output = process.StandardOutput.ReadToEnd();
@@ -91,7 +89,6 @@ namespace ScriptAtRestServer.Services
                     Output = output,
                     ErrorOutput = errorOutput
                 };
-            });
         }
 
 
@@ -138,7 +135,7 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
-        private static async Task<Process> CreateProcess(string processArgs , string fileName)
+        private static async Task<Process> CreateProcessAsync(string processArgs , string fileName)
         {
             return await Task.Run(() =>
             {
@@ -158,7 +155,7 @@ namespace ScriptAtRestServer.Services
             });
         }
 
-        private static Process CreateProcessAsync(string processArgs, string fileName)
+        private static Process CreateProcess(string processArgs, string fileName)
         {
             return new Process
             {
