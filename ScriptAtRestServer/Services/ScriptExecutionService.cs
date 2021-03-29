@@ -68,10 +68,9 @@ namespace ScriptAtRestServer.Services
 
                 string scriptContent = script.Content;
                 ScriptEnums.ScriptType scriptType = script.Type;
+                
                 string scriptSuffix, fileName;
-
                 SelectScriptDetails(scriptType, out scriptSuffix, out fileName);
-
 
                 //save script content to temporary file
                 //this automatically creates temporary empty file with unique name and returns file path
@@ -139,7 +138,27 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
-        private static Process CreateProcess(string processArgs , string fileName)
+        private static async Task<Process> CreateProcess(string processArgs , string fileName)
+        {
+            return await Task.Run(() =>
+            {
+                using Process process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        FileName = fileName,
+                        Arguments = processArgs
+                    }
+                };
+                return process;
+            });
+        }
+
+        private static Process CreateProcessAsync(string processArgs, string fileName)
         {
             return new Process
             {
