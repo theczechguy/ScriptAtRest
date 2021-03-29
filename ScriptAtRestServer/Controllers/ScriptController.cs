@@ -8,6 +8,8 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using System;
+using System.Text;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -118,6 +120,28 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogError(ex, "Failed to execute script");
                 return BadRequest(new { message = "Failed to execute script" });
             }
+        }
+
+        [HttpPost("run/test/{id}")]
+        public IActionResult TestParams([FromBody] ScriptParamArray Model , int Id) {
+            _logger.LogInformation("Run TestParams");
+            _logger.LogInformation("Script ID : {id}" , Id);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            if (Model.Parameters.Count > 0)
+            {
+                _logger.LogInformation("Count of received parameters : {paramcount}", Model.Parameters.Count);
+                foreach (ScriptParamModel paramModel in Model.Parameters)
+                {
+                    string combined = string.Format(" -{0} {1}", paramModel.ParameterName,paramModel.ParameterValue);
+                    stringBuilder.Append(combined);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("No parameters received");
+            }
+            return Ok();
         }
     }
 }
