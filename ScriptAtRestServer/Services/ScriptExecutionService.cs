@@ -17,6 +17,7 @@ namespace ScriptAtRestServer.Services
     {
         Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
         Task<ProcessModel> RunScriptById(int id);
+        Task<ProcessModel> RunScriptById(int id, ScriptParamArray paramArray);
     };
 
     public class ScriptExecutionService : IScriptExecutionService
