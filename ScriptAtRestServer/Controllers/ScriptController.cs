@@ -122,6 +122,22 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
+        [HttpPost("run/{id}")]
+        public async Task<IActionResult> ExecuteScriptByIdWithParams([FromBody] ScriptParamArray Model , int Id)
+        {
+            _logger.LogInformation("Run script with parameters ID : {scriptid}" , Id);
+            try
+            {
+                ProcessModel p = await _scriptExecutionService.RunScriptById(Id, Model);
+                return Ok(p);
+            }
+            catch (AppException ex)
+            {
+                _logger.LogError(ex, "Failed to execute script");
+                return BadRequest(new { message = "Failed to execute script" });
+            }
+        }
+
         [HttpPost("run/test/{id}")]
         public IActionResult TestParams([FromBody] ScriptParamArray Model , int Id) {
             _logger.LogInformation("Run TestParams");
