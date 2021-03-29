@@ -73,15 +73,11 @@ namespace ScriptAtRestServer.Services
             //save script content to temporary file
             //this automatically creates temporary empty file with unique name and returns file path
             string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
-            string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
+            string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
 
             Process process = await CreateProcessAsync(processArgs, fileName);
-            process.Start();
-
             string output = process.StandardOutput.ReadToEnd();
             string errorOutput = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
 
             return new ProcessModel
             {
@@ -111,30 +107,26 @@ namespace ScriptAtRestServer.Services
 
         private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
-            string processArgs = string.Empty;
             StringBuilder stringBuilder = new StringBuilder();
+
+            switch (scriptType)
+            {
+                case ScriptEnums.ScriptType.Shell:
+                    stringBuilder.Append(string.Format(" /c {0}" , scriptFilePath)); // /c c:/f/script.cmd
+                    break;
+                case ScriptEnums.ScriptType.PowerShell:
+                    stringBuilder.Append(string.Format(" -f {0}", scriptFilePath)); // -f c:/f/script.ps1
+                    break;
+            }
 
             if (paramArray.Parameters.Count > 0)
             {
                 foreach (ScriptParamModel paramModel in paramArray.Parameters)
                 {
-                    string combined = string.Format(" -{0} {1}", paramModel.ParameterName, paramModel.ParameterValue);
-                    stringBuilder.Append(combined);
+                    stringBuilder.Append(string.Format(" -{0} {1}", paramModel.ParameterName, paramModel.ParameterValue));
                 }
-                
             }
-
-            switch (scriptType)
-            {
-                case ScriptEnums.ScriptType.Shell:
-                    processArgs = $" /c {scriptFilePath}";
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    processArgs = $" -f {scriptFilePath}";
-                    break;
-            }
-
-            return processArgs;
+            return stringBuilder.ToString();
         }
 
         private static void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
@@ -178,6 +170,9 @@ namespace ScriptAtRestServer.Services
                         Arguments = processArgs
                     }
                 };
+                process.Start();
+                process.WaitForExit();
+
                 return process;
             });
         }
