@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
 using ScriptAtRestServer.Helpers;
+using ScriptAtRestServer.Models.Scripts;
 
 namespace ScriptAtRestServer.Services
 {
@@ -59,6 +60,43 @@ namespace ScriptAtRestServer.Services
             });
         }
 
+        public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
+        {
+            return await Task.Run(() =>
+            {
+                Script script = _context.Scripts.Find(id);
+
+                string scriptContent = script.Content;
+                ScriptEnums.ScriptType scriptType = script.Type;
+                string scriptSuffix, fileName;
+
+                SelectScriptDetails(scriptType, out scriptSuffix, out fileName);
+
+
+                //save script content to temporary file
+                //this automatically creates temporary empty file with unique name and returns file path
+                string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+                string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
+
+                Process process = CreateProcess(processArgs, fileName);
+                process.Start();
+
+                string output = process.StandardOutput.ReadToEnd();
+                string errorOutput = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                return new ProcessModel
+                {
+                    ExitCode = process.ExitCode,
+                    Output = output,
+                    ErrorOutput = errorOutput
+                };
+            });
+        }
+
+
+        #region helper methods
         private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
         {
             string processArgs = string.Empty;
@@ -101,6 +139,25 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
+        private static Process CreateProcess(string processArgs , string fileName)
+        {
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    FileName = fileName,
+                    Arguments = processArgs
+                }
+            };
+        }
+        #endregion
+
+        #region obsolete
+
         public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
         {
             string processArgs = string.Empty;
@@ -129,7 +186,6 @@ namespace ScriptAtRestServer.Services
                 ErrorOutput = errorOutput
             };
         });
-
         private static Process CreateProcess(ScriptEnums.ScriptType Type, string processArgs)
         {
             return new Process
@@ -145,21 +201,6 @@ namespace ScriptAtRestServer.Services
                 }
             };
         }
-
-        private static Process CreateProcess(string processArgs , string fileName)
-        {
-            return new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    FileName = fileName,
-                    Arguments = processArgs
-                }
-            };
-        }
+        #endregion
     }
 }
