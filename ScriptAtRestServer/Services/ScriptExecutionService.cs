@@ -110,6 +110,34 @@ namespace ScriptAtRestServer.Services
             return processArgs;
         }
 
+        private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
+        {
+            string processArgs = string.Empty;
+            StringBuilder stringBuilder = new StringBuilder();
+
+            if (paramArray.Parameters.Count > 0)
+            {
+                foreach (ScriptParamModel paramModel in paramArray.Parameters)
+                {
+                    string combined = string.Format(" -{0} {1}", paramModel.ParameterName, paramModel.ParameterValue);
+                    stringBuilder.Append(combined);
+                }
+                
+            }
+
+            switch (scriptType)
+            {
+                case ScriptEnums.ScriptType.Shell:
+                    processArgs = $" /c {scriptFilePath}";
+                    break;
+                case ScriptEnums.ScriptType.PowerShell:
+                    processArgs = $" -f {scriptFilePath}";
+                    break;
+            }
+
+            return processArgs;
+        }
+
         private static void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
         {
             scriptSuffix = string.Empty;
