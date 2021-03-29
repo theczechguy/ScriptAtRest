@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
@@ -62,35 +63,33 @@ namespace ScriptAtRestServer.Services
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
         {
-                Script script = _context.Scripts.Find(id);
+            Script script = _context.Scripts.Find(id);
 
-                string scriptContent = script.Content;
-                ScriptEnums.ScriptType scriptType = script.Type;
+            string scriptContent = script.Content;
+            ScriptEnums.ScriptType scriptType = script.Type;
                 
-                string scriptSuffix, fileName;
-                SelectScriptDetails(scriptType, out scriptSuffix, out fileName);
+            SelectScriptDetails(scriptType, out string scriptSuffix, out string fileName);
 
-                //save script content to temporary file
-                //this automatically creates temporary empty file with unique name and returns file path
-                string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
-                string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
+            //save script content to temporary file
+            //this automatically creates temporary empty file with unique name and returns file path
+            string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+            string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
 
-                Process process = await CreateProcessAsync(processArgs, fileName);
-                process.Start();
+            Process process = await CreateProcessAsync(processArgs, fileName);
+            process.Start();
 
-                string output = process.StandardOutput.ReadToEnd();
-                string errorOutput = process.StandardError.ReadToEnd();
+            string output = process.StandardOutput.ReadToEnd();
+            string errorOutput = process.StandardError.ReadToEnd();
 
-                process.WaitForExit();
+            process.WaitForExit();
 
-                return new ProcessModel
-                {
-                    ExitCode = process.ExitCode,
-                    Output = output,
-                    ErrorOutput = errorOutput
-                };
+            return new ProcessModel
+            {
+                ExitCode = process.ExitCode,
+                Output = output,
+                ErrorOutput = errorOutput
+            };
         }
-
 
         #region helper methods
         private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
