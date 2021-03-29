@@ -143,7 +143,7 @@ namespace ScriptAtRestServer.Services
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
+                        WorkingDirectory = Path.GetTempPath(),
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
