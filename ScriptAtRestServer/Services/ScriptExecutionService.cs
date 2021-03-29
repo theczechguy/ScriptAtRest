@@ -29,24 +29,13 @@ namespace ScriptAtRestServer.Services
             return await Task.Run(() =>
             {
                 Script script = _context.Scripts.Find(id);
-                
+
                 string scriptContent = script.Content;
                 ScriptEnums.ScriptType scriptType = script.Type;
+                string scriptSuffix, fileName;
 
-                string scriptSuffix = string.Empty;
-                string fileName = string.Empty;
-
-                switch (scriptType)
-                {
-                    case ScriptEnums.ScriptType.PowerShell:
-                        scriptSuffix = ".ps1";
-                        fileName = "powershell.exe";
-                        break;
-                    default:
-                        scriptSuffix = ".cmd";
-                        fileName = "cmd.exe";
-                        break;
-                }
+                SelectScriptDetails(scriptType,out scriptSuffix,out fileName);
+                
 
                 //save script content to temporary file
                 //this automatically creates temporary empty file with unique name and returns file path
@@ -78,6 +67,23 @@ namespace ScriptAtRestServer.Services
                     ErrorOutput = errorOutput
                 };
             });
+        }
+
+        private static void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
+        {
+            scriptSuffix = string.Empty;
+            fileName = string.Empty;
+            switch (scriptType)
+            {
+                case ScriptEnums.ScriptType.PowerShell:
+                    scriptSuffix = ".ps1";
+                    fileName = "powershell.exe";
+                    break;
+                default:
+                    scriptSuffix = ".cmd";
+                    fileName = "cmd.exe";
+                    break;
+            }
         }
 
         private static string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
