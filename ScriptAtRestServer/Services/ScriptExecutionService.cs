@@ -34,23 +34,13 @@ namespace ScriptAtRestServer.Services
                 ScriptEnums.ScriptType scriptType = script.Type;
                 string scriptSuffix, fileName;
 
-                SelectScriptDetails(scriptType,out scriptSuffix,out fileName);
-                
+                SelectScriptDetails(scriptType, out scriptSuffix, out fileName);
+
 
                 //save script content to temporary file
                 //this automatically creates temporary empty file with unique name and returns file path
                 string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
-                string processArgs = string.Empty;
-
-                switch (scriptType)
-                {
-                    case ScriptEnums.ScriptType.Shell:
-                        processArgs = $" {scriptFilePath}";
-                        break;
-                    case ScriptEnums.ScriptType.PowerShell:
-                        processArgs = $" -f {scriptFilePath}";
-                        break;
-                }
+                string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
 
                 Process process = CreateProcess(processArgs, fileName);
                 process.Start();
@@ -67,6 +57,23 @@ namespace ScriptAtRestServer.Services
                     ErrorOutput = errorOutput
                 };
             });
+        }
+
+        private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
+        {
+            string processArgs = string.Empty;
+
+            switch (scriptType)
+            {
+                case ScriptEnums.ScriptType.Shell:
+                    processArgs = $" /c {scriptFilePath}";
+                    break;
+                case ScriptEnums.ScriptType.PowerShell:
+                    processArgs = $" -f {scriptFilePath}";
+                    break;
+            }
+
+            return processArgs;
         }
 
         private static void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)

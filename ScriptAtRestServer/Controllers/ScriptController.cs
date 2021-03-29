@@ -136,6 +136,7 @@ namespace ScriptAtRestServer.Controllers
                     string combined = string.Format(" -{0} {1}", paramModel.ParameterName,paramModel.ParameterValue);
                     stringBuilder.Append(combined);
                 }
+                _logger.LogInformation("Parameter string : {params}" , stringBuilder.ToString());
             }
             else
             {
