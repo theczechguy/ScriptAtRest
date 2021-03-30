@@ -122,7 +122,7 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
-        [HttpPost("run/{id}")]
+        [HttpPost("run/withparams/{id}")]
         public async Task<IActionResult> ExecuteScriptByIdWithParams([FromBody] ScriptParamArray Model , int Id)
         {
             _logger.LogInformation("Run script with parameters ID : {scriptid}" , Id);
