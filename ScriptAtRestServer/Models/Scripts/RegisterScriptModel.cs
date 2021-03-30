@@ -7,8 +7,11 @@ namespace ScriptAtRestServer.Models.Scripts
     {
         [Required]
         public string Name { get; set; }
-        public string Content { get; set; }
+
         [Required]
         public ScriptEnums.ScriptType Type { get; set; }
+
+        [Required]
+        public string EncodedContent { get; set; }
     }
 }

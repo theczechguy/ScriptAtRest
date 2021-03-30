@@ -37,15 +37,18 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterScriptModel model) {
+        public IActionResult Register([FromBody] RegisterScriptModel Model) {
             _logger.LogInformation("Register new script");
 
             try
             {
-                Script script = _mapper.Map<Script>(model);
+                string decodedContent = Base64.DecodeBase64(Model.EncodedContent);
+                Script script = _mapper.Map<Script>(Model);
+                script.Content = decodedContent;
                 Script createdScript = _scriptService.Create(script);
+
                 ScriptModel scriptModel = _mapper.Map<ScriptModel>(createdScript);
-                _logger.LogInformation("Script registered with id : {scriptId}" , createdScript.Id);
+                _logger.LogInformation("Script registered with id : {scriptId}" , scriptModel.id);
                 return Ok(scriptModel);
             }
             catch (AppException ex)
