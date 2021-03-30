@@ -113,7 +113,8 @@ namespace ScriptAtRestServer.Services
             {
                 foreach (ScriptParamModel paramModel in paramArray.Parameters)
                 {
-                    stringBuilder.Append(string.Format(" -{0} {1}", paramModel.ParameterName, paramModel.ParameterValue));
+                    string decodedValue = Base64.DecodeBase64(paramModel.ParameterValue);
+                    stringBuilder.Append(string.Format(" -{0} {1}", paramModel.ParameterName, decodedValue));
                 }
             }
             return stringBuilder.ToString();

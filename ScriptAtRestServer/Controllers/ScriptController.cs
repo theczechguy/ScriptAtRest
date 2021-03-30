@@ -129,7 +129,7 @@ namespace ScriptAtRestServer.Controllers
         [HttpPost("run/withparams/{id}")]
         public async Task<IActionResult> ExecuteScriptByIdWithParams([FromBody] ScriptParamArray Model , int Id)
         {
-            _logger.LogInformation("Run script with parameters ID : {scriptid}" , Id);
+            _logger.LogInformation("Run script with ID : {scriptid}" , Id);
             try
             {
                 ProcessModel p = await _scriptExecutionService.RunScriptById(Id, Model);
