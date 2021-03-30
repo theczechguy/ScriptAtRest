@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System;
 using System.Text;
+using ScriptAtRestServer.Helpers;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -53,6 +54,20 @@ namespace ScriptAtRestServer.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("register/encoded")]
+        public IActionResult RegisterEncoded([FromBody] RegisterScriptEncodedModel Model)
+        {
+            _logger.LogInformation("Register new encoded script");
+            _logger.LogInformation("{@model}", Model);
+
+            string decodedContent = Base64.DecodeBase64(Model.EncodedContent);
+
+            _logger.LogInformation("Decoded content : {content}", decodedContent);
+            return Ok();
+        }
+
+
 
         [HttpGet]
         public IActionResult GetAll() {
