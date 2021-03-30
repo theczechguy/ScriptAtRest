@@ -2,7 +2,7 @@
 {
     public class ScriptParamModel
     {
-        public string ParameterName { get; set; }
-        public string ParameterValue { get; set; }
+        public string Name { get; set; }
+        public string EncodedValue { get; set; }
     }
 }
