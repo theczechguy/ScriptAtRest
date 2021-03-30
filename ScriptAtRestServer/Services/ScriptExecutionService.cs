@@ -74,16 +74,7 @@ namespace ScriptAtRestServer.Services
             string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
 
-            Process process = await StartProcessAsync(processArgs, fileName);
-            string output = process.StandardOutput.ReadToEnd();
-            string errorOutput = process.StandardError.ReadToEnd();
-
-            return new ProcessModel
-            {
-                ExitCode = process.ExitCode,
-                Output = output,
-                ErrorOutput = errorOutput
-            };
+            return await RunProcessAsync(processArgs, fileName);
         }
 
         #region helper methods
@@ -130,8 +121,6 @@ namespace ScriptAtRestServer.Services
 
         private static void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
         {
-            scriptSuffix = string.Empty;
-            fileName = string.Empty;
             switch (scriptType)
             {
                 case ScriptEnums.ScriptType.PowerShell:
@@ -153,7 +142,7 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
-        private static async Task<Process> StartProcessAsync(string processArgs , string fileName)
+        private static async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
         {
             return await Task.Run(() =>
             {
@@ -170,9 +159,18 @@ namespace ScriptAtRestServer.Services
                     }
                 };
                 process.Start();
+
+                string output = process.StandardOutput.ReadToEnd();
+                string errorOutput = process.StandardError.ReadToEnd();
+
                 process.WaitForExit();
 
-                return process;
+                return new ProcessModel
+                {
+                    ExitCode = process.ExitCode,
+                    Output = output,
+                    ErrorOutput = errorOutput
+                };
             });
         }
 
