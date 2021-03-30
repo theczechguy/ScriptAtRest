@@ -58,20 +58,6 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
-        [HttpPost("register/encoded")]
-        public IActionResult RegisterEncoded([FromBody] RegisterScriptEncodedModel Model)
-        {
-            _logger.LogInformation("Register new encoded script");
-            _logger.LogInformation("{@model}", Model);
-
-            string decodedContent = Base64.DecodeBase64(Model.EncodedContent);
-
-            _logger.LogInformation("Decoded content : {content}", decodedContent);
-            return Ok();
-        }
-
-
-
         [HttpGet]
         public IActionResult GetAll() {
             _logger.LogInformation("Get all scripts");
