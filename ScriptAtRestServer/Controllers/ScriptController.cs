@@ -109,8 +109,8 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
-        [HttpPost("run/withparams/{id}")]
-        public async Task<IActionResult> ExecuteScriptByIdWithParams([FromBody] ScriptParamArray Model , int Id)
+        [HttpPost("run/{id}")]
+        public async Task<IActionResult> ExecuteScriptById([FromBody] ScriptParamArray? Model , int Id)
         {
             _logger.LogInformation("Run script with ID : {scriptid}" , Id);
             try
