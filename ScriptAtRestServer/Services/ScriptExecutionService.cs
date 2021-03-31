@@ -109,6 +109,11 @@ namespace ScriptAtRestServer.Services
                     break;
             }
 
+            if (paramArray == null)
+            {
+                return stringBuilder.ToString();
+            }
+
             if (paramArray.Parameters.Count > 0)
             {
                 foreach (ScriptParamModel paramModel in paramArray.Parameters)
