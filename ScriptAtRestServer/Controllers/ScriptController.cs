@@ -8,6 +8,9 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using System;
+using System.Text;
+using ScriptAtRestServer.Helpers;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -34,15 +37,18 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterScriptModel model) {
+        public IActionResult Register([FromBody] RegisterScriptModel Model) {
             _logger.LogInformation("Register new script");
 
             try
             {
-                Script script = _mapper.Map<Script>(model);
+                string decodedContent = Base64.DecodeBase64(Model.EncodedContent);
+                Script script = _mapper.Map<Script>(Model);
+                script.Content = decodedContent;
                 Script createdScript = _scriptService.Create(script);
+
                 ScriptModel scriptModel = _mapper.Map<ScriptModel>(createdScript);
-                _logger.LogInformation("Script registered with id : {scriptId}" , createdScript.Id);
+                _logger.LogInformation("Script registered with id : {scriptId}" , scriptModel.id);
                 return Ok(scriptModel);
             }
             catch (AppException ex)
@@ -104,13 +110,12 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("run/{id}")]
-        public async Task<IActionResult> ExecuteScriptById(int Id)
+        public async Task<IActionResult> ExecuteScriptById([FromBody] ScriptParamArray? Model , int Id)
         {
             _logger.LogInformation("Run script with ID : {scriptid}" , Id);
-
             try
             {
-                ProcessModel p = await _scriptExecutionService.RunScriptById(Id);
+                ProcessModel p = await _scriptExecutionService.RunScriptById(Id, Model);
                 return Ok(p);
             }
             catch (AppException ex)
