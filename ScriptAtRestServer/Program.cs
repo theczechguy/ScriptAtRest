@@ -17,6 +17,7 @@ namespace ScriptAtRestServer
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
+                .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .WriteTo.Console()
                 .CreateLogger();
