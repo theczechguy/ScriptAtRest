@@ -3,9 +3,11 @@ name: .NET
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'level'
+        default: 'test'
 jobs:
   build:
 
