@@ -82,7 +82,7 @@ namespace ScriptAtRestServer.Services
         }
 
         #region helper methods
-        private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
+        private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
         {
             string processArgs = string.Empty;
 
@@ -99,7 +99,7 @@ namespace ScriptAtRestServer.Services
             return processArgs;
         }
 
-        private static string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
+        private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -129,7 +129,7 @@ namespace ScriptAtRestServer.Services
             return stringBuilder.ToString();
         }
 
-        private static void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
+        private void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
         {
             switch (scriptType)
             {
@@ -144,7 +144,7 @@ namespace ScriptAtRestServer.Services
             }
         }
 
-        private static string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
+        private string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
         {
             string tempFilePath = Path.GetTempFileName();
             tempFilePath = Path.ChangeExtension(tempFilePath, ScriptSuffix);
@@ -152,7 +152,7 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
-        private static async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
+        private async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
         {
             return await Task.Run(() =>
             {
@@ -184,7 +184,7 @@ namespace ScriptAtRestServer.Services
             });
         }
 
-        private static Process CreateProcess(string processArgs, string fileName)
+        private Process CreateProcess(string processArgs, string fileName)
         {
             return new Process
             {
