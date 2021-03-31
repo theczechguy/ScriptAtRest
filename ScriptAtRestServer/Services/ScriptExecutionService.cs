@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
 using ScriptAtRestServer.Helpers;
@@ -22,9 +23,11 @@ namespace ScriptAtRestServer.Services
 
     public class ScriptExecutionService : IScriptExecutionService
     {
+        private ILogger<ScriptExecutionService> _logger;
         private SqLiteDataContext _context;
-        public ScriptExecutionService(SqLiteDataContext Context) {
+        public ScriptExecutionService(SqLiteDataContext Context ,ILogger<ScriptExecutionService> Logger) {
             _context = Context;
+            _logger = Logger;
         }
 
         public async Task<ProcessModel> RunScriptById(int id)
@@ -73,6 +76,7 @@ namespace ScriptAtRestServer.Services
 
             string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
+            _logger.LogInformation("Process arguments : {args}" , processArgs);
 
             return await RunProcessAsync(processArgs, fileName);
         }
