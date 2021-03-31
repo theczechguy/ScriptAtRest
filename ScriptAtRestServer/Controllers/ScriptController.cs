@@ -124,22 +124,5 @@ namespace ScriptAtRestServer.Controllers
                 return BadRequest(new { message = "Failed to execute script" });
             }
         }
-
-        //[HttpPost("run/{id}")]
-        //public async Task<IActionResult> ExecuteScriptById(int Id)
-        //{
-        //    _logger.LogInformation("Run script with ID : {scriptid}", Id);
-
-        //    try
-        //    {
-        //        ProcessModel p = await _scriptExecutionService.RunScriptById(Id);
-        //        return Ok(p);
-        //    }
-        //    catch (AppException ex)
-        //    {
-        //        _logger.LogError(ex, "Failed to execute script");
-        //        return BadRequest(new { message = "Failed to execute script" });
-        //    }
-        //}
     }
 }
