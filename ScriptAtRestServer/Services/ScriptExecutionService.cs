@@ -17,7 +17,6 @@ namespace ScriptAtRestServer.Services
     public interface IScriptExecutionService
     {
         Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
-        Task<ProcessModel> RunScriptById(int id);
         Task<ProcessModel> RunScriptById(int id, ScriptParamArray paramArray);
     };
 
@@ -28,41 +27,6 @@ namespace ScriptAtRestServer.Services
         public ScriptExecutionService(SqLiteDataContext Context ,ILogger<ScriptExecutionService> Logger) {
             _context = Context;
             _logger = Logger;
-        }
-
-        public async Task<ProcessModel> RunScriptById(int id)
-        {
-            return await Task.Run(() =>
-            {
-                Script script = _context.Scripts.Find(id);
-
-                string scriptContent = script.Content;
-                ScriptEnums.ScriptType scriptType = script.Type;
-                string scriptSuffix, fileName;
-
-                SelectScriptDetails(scriptType, out scriptSuffix, out fileName);
-
-
-                //save script content to temporary file
-                //this automatically creates temporary empty file with unique name and returns file path
-                string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
-                string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
-
-                Process process = CreateProcess(processArgs, fileName);
-                process.Start();
-
-                string output = process.StandardOutput.ReadToEnd();
-                string errorOutput = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
-
-                return new ProcessModel
-                {
-                    ExitCode = process.ExitCode,
-                    Output = output,
-                    ErrorOutput = errorOutput
-                };
-            });
         }
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
