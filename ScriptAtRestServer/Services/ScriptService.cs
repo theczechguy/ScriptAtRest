@@ -14,7 +14,7 @@ namespace ScriptAtRestServer.Services
     public interface IScriptService {
         Task<Script> Create(Script Script);
         IEnumerable<Script> GetAll();
-        Script GetById(int id);
+        Task<Script> GetByIdAsync(int id);
         void Delete(int id);
     }
     public class ScriptService : IScriptService
@@ -50,7 +50,7 @@ namespace ScriptAtRestServer.Services
             await _context.SaveChangesAsync();
         }
 
-        public void Delete(string Name) {
+        public async void Delete(string Name) {
             var script = _context.Scripts.Find(Name);
 
             if (script == null)
@@ -59,7 +59,7 @@ namespace ScriptAtRestServer.Services
             }
 
             _context.Scripts.Remove(script);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public IEnumerable<Script> GetAll()
@@ -67,17 +67,17 @@ namespace ScriptAtRestServer.Services
             return _context.Scripts;
         }
 
-        public Script GetById(int Id) {
-            return _context.Scripts.Find(Id);
+        public async Task<Script> GetByIdAsync(int Id) {
+            return await _context.Scripts.FindAsync(Id);
         }
 
-        public void Delete(int Id)
+        public async void Delete(int Id)
         {
             Script script = _context.Scripts.Find(Id);
             if (script != null)
             {
                 _context.Scripts.Remove(script);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }
