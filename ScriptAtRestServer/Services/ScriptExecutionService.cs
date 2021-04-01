@@ -16,7 +16,6 @@ namespace ScriptAtRestServer.Services
 {
     public interface IScriptExecutionService
     {
-        Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
         Task<ProcessModel> RunScriptById(int id, ScriptParamArray paramArray);
     };
 
@@ -47,23 +46,6 @@ namespace ScriptAtRestServer.Services
         }
 
         #region helper methods
-        private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
-        {
-            string processArgs = string.Empty;
-
-            switch (scriptType)
-            {
-                case ScriptEnums.ScriptType.Shell:
-                    processArgs = $" /c {scriptFilePath}";
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    processArgs = $" -f {scriptFilePath}";
-                    break;
-            }
-
-            return processArgs;
-        }
-
         private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -147,69 +129,6 @@ namespace ScriptAtRestServer.Services
                     ErrorOutput = errorOutput
                 };
             });
-        }
-
-        private Process CreateProcess(string processArgs, string fileName)
-        {
-            return new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    FileName = fileName,
-                    Arguments = processArgs
-                }
-            };
-        }
-        #endregion
-
-        #region obsolete
-
-        public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
-        {
-            string processArgs = string.Empty;
-            switch (Type)
-            {
-                case ScriptEnums.ScriptType.Shell:
-                    processArgs = $" {Name.TrimEnd()} {Parameters}";
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    processArgs = $" -f {Name.TrimEnd()} {Parameters}";
-                    break;
-            }
-
-            Process process = CreateProcess(Type, processArgs);
-            process.Start();
-
-            string output = process.StandardOutput.ReadToEnd();
-            string errorOutput = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            return new ProcessModel
-            {
-                ExitCode = process.ExitCode,
-                Output = output,
-                ErrorOutput = errorOutput
-            };
-        });
-        private static Process CreateProcess(ScriptEnums.ScriptType Type, string processArgs)
-        {
-            return new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
-                    Arguments = processArgs
-                }
-            };
         }
         #endregion
     }
