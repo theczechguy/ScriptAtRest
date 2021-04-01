@@ -75,8 +75,9 @@ namespace ScriptAtRestServer.Services
             SelectScriptDetails(scriptType, out string scriptSuffix, out string fileName);
 
             string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+            _logger.LogDebug("Script file : {fullPath}" , scriptFilePath);
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
-            _logger.LogInformation("Process arguments : {args}" , processArgs);
+            _logger.LogDebug("Process arguments : {args}" , processArgs);
 
             return await RunProcessAsync(processArgs, fileName);
         }
