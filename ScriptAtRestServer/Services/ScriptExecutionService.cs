@@ -52,7 +52,7 @@ namespace ScriptAtRestServer.Services
                 throw;
             }
             finally {
-                await DeleteScriptFileAsync(fileName);
+                await DeleteScriptFileAsync(scriptFilePath);
             }
         }
 
