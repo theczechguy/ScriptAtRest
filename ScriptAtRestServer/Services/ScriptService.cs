@@ -31,8 +31,8 @@ namespace ScriptAtRestServer.Services
                 throw new AppException("Scriptname is already taken");
             }
 
-            _context.Scripts.Add(Script);
-            _context.SaveChanges();
+            await _context.Scripts.AddAsync(Script);
+            await _context.SaveChangesAsync();
 
             return Script;
         }
