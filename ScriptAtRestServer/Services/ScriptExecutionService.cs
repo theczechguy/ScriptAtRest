@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
@@ -23,9 +24,14 @@ namespace ScriptAtRestServer.Services
     {
         private ILogger<ScriptExecutionService> _logger;
         private SqLiteDataContext _context;
-        public ScriptExecutionService(SqLiteDataContext Context ,ILogger<ScriptExecutionService> Logger) {
+        protected readonly IConfiguration _configuration;
+        public ScriptExecutionService(
+            SqLiteDataContext Context ,
+            ILogger<ScriptExecutionService> Logger,
+            IConfiguration Configuration) {
             _context = Context;
             _logger = Logger;
+            _configuration = Configuration;
         }
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
@@ -112,7 +118,16 @@ namespace ScriptAtRestServer.Services
 
         private Task DeleteScriptFileAsync(string FilePath) 
         {
-            return Task.Run(() => File.Delete(FilePath));
+            bool deleteScript = _configuration.GetValue<bool>("ScriptExecution:DeleteScriptFilesAfterExecution");
+            if (deleteScript)
+            {
+                return Task.Run(() => File.Delete(FilePath));
+            }
+            else
+            {
+                _logger.LogWarning("File will not be deleted as requested by configuration option 'DeleteScriptFilesAfterExecution'");
+                return Task.CompletedTask;
+            }
         }
 
         private async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
