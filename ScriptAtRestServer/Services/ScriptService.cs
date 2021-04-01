@@ -31,14 +31,14 @@ namespace ScriptAtRestServer.Services
                 throw new AppException("Scriptname is already taken");
             }
 
-            await _context.Scripts.AddAsync(Script);
+            _context.Scripts.Add(Script);
             await _context.SaveChangesAsync();
 
             return Script;
         }
 
-        public void Update(Script Script) {
-            var script = _context.Scripts.Find(Script.Id);
+        public async void Update(Script Script) {
+            Script script = _context.Scripts.Find(Script.Id);
             if (script == null)
             {
                 throw new AppException("Script not found");
@@ -47,7 +47,7 @@ namespace ScriptAtRestServer.Services
             script.Name = Script.Name;
 
             _context.Scripts.Update(script);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         public void Delete(string Name) {
@@ -59,7 +59,7 @@ namespace ScriptAtRestServer.Services
             }
 
             _context.Scripts.Remove(script);
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
         }
 
         public IEnumerable<Script> GetAll()
