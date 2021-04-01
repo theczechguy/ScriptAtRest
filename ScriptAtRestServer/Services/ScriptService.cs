@@ -6,12 +6,13 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScriptAtRestServer.Services
 {
 
     public interface IScriptService {
-        Script Create(Script Script);
+        Task<Script> Create(Script Script);
         IEnumerable<Script> GetAll();
         Script GetById(int id);
         void Delete(int id);
@@ -23,9 +24,9 @@ namespace ScriptAtRestServer.Services
         {
             _context = Context;
         }
-        public Script Create(Script Script)
+        public async Task<Script> Create(Script Script)
         {
-            if (_context.Scripts.Any(x => x.Name == Script.Name))
+            if (await _context.Scripts.AnyAsync(x => x.Name == Script.Name))
             {
                 throw new AppException("Scriptname is already taken");
             }
