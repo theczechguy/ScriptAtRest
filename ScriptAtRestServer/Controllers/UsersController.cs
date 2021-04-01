@@ -46,7 +46,7 @@ namespace ScriptAtRestServer.Controllers
                 // create user
                 _userService.Create(user, model.Password);
                 _logger.LogInformation("User registered");
-                return Ok();
+                return Ok(new { message = "User registered"});
             }
             catch (AppException ex)
             {
