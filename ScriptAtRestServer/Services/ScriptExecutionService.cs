@@ -36,7 +36,7 @@ namespace ScriptAtRestServer.Services
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
         {
-            Script script = _context.Scripts.Find(id);
+            Script script = await _context.Scripts.FindAsync(id);
 
             string scriptContent = script.Content;
             ScriptEnums.ScriptType scriptType = script.Type;
