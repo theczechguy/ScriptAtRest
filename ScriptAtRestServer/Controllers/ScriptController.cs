@@ -8,9 +8,6 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using System;
-using System.Text;
-using ScriptAtRestServer.Helpers;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -80,7 +77,7 @@ namespace ScriptAtRestServer.Controllers
             _logger.LogInformation("Get Script with id : {scriptid}", Id);
             try
             {
-                var script = _scriptService.GetById(Id);
+                var script = _scriptService.GetByIdAsync(Id);
                 var model = _mapper.Map<ScriptModel>(script);
                 _logger.LogInformation("Retrieved script : {scriptName}", model.Name);
                 return Ok(model);
