@@ -121,6 +121,7 @@ namespace ScriptAtRestServer.Services
             bool deleteScript = _configuration.GetValue<bool>("ScriptExecution:DeleteScriptFilesAfterExecution");
             if (deleteScript)
             {
+                _logger.LogDebug("Deleting file : {file}" , FilePath);
                 return Task.Run(() => File.Delete(FilePath));
             }
             else
