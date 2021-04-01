@@ -100,6 +100,7 @@ namespace ScriptAtRestServer.Controllers
             try
             {
                 _scriptService.Delete(Id);
+                _logger.LogInformation("Script deleted");
                 return Ok();
             }
             catch (AppException ex)
