@@ -42,7 +42,18 @@ namespace ScriptAtRestServer.Services
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
             _logger.LogDebug("Process arguments : {args}" , processArgs);
 
-            return await RunProcessAsync(processArgs, fileName);
+            try
+            {
+                ProcessModel processModel = await RunProcessAsync(processArgs, fileName);
+                return processModel;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally {
+                await DeleteScriptFileAsync(fileName);
+            }
         }
 
         #region helper methods
@@ -97,6 +108,11 @@ namespace ScriptAtRestServer.Services
             tempFilePath = Path.ChangeExtension(tempFilePath, ScriptSuffix);
             File.WriteAllText(tempFilePath, ScriptContent);
             return tempFilePath;
+        }
+
+        private Task DeleteScriptFileAsync(string FilePath) 
+        {
+            return Task.Run(() => File.Delete(FilePath));
         }
 
         private async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
