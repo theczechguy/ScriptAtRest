@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
@@ -16,8 +17,6 @@ namespace ScriptAtRestServer.Services
 {
     public interface IScriptExecutionService
     {
-        Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters);
-        Task<ProcessModel> RunScriptById(int id);
         Task<ProcessModel> RunScriptById(int id, ScriptParamArray paramArray);
     };
 
@@ -25,44 +24,14 @@ namespace ScriptAtRestServer.Services
     {
         private ILogger<ScriptExecutionService> _logger;
         private SqLiteDataContext _context;
-        public ScriptExecutionService(SqLiteDataContext Context ,ILogger<ScriptExecutionService> Logger) {
+        protected readonly IConfiguration _configuration;
+        public ScriptExecutionService(
+            SqLiteDataContext Context ,
+            ILogger<ScriptExecutionService> Logger,
+            IConfiguration Configuration) {
             _context = Context;
             _logger = Logger;
-        }
-
-        public async Task<ProcessModel> RunScriptById(int id)
-        {
-            return await Task.Run(() =>
-            {
-                Script script = _context.Scripts.Find(id);
-
-                string scriptContent = script.Content;
-                ScriptEnums.ScriptType scriptType = script.Type;
-                string scriptSuffix, fileName;
-
-                SelectScriptDetails(scriptType, out scriptSuffix, out fileName);
-
-
-                //save script content to temporary file
-                //this automatically creates temporary empty file with unique name and returns file path
-                string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
-                string processArgs = PrepareScriptArguments(scriptType, scriptFilePath);
-
-                Process process = CreateProcess(processArgs, fileName);
-                process.Start();
-
-                string output = process.StandardOutput.ReadToEnd();
-                string errorOutput = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
-
-                return new ProcessModel
-                {
-                    ExitCode = process.ExitCode,
-                    Output = output,
-                    ErrorOutput = errorOutput
-                };
-            });
+            _configuration = Configuration;
         }
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
@@ -79,27 +48,21 @@ namespace ScriptAtRestServer.Services
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
             _logger.LogDebug("Process arguments : {args}" , processArgs);
 
-            return await RunProcessAsync(processArgs, fileName);
+            try
+            {
+                ProcessModel processModel = await RunProcessAsync(processArgs, fileName);
+                return processModel;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally {
+                await DeleteScriptFileAsync(scriptFilePath);
+            }
         }
 
         #region helper methods
-        private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath)
-        {
-            string processArgs = string.Empty;
-
-            switch (scriptType)
-            {
-                case ScriptEnums.ScriptType.Shell:
-                    processArgs = $" /c {scriptFilePath}";
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    processArgs = $" -f {scriptFilePath}";
-                    break;
-            }
-
-            return processArgs;
-        }
-
         private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -153,6 +116,21 @@ namespace ScriptAtRestServer.Services
             return tempFilePath;
         }
 
+        private Task DeleteScriptFileAsync(string FilePath) 
+        {
+            bool deleteScript = _configuration.GetValue<bool>("ScriptExecution:DeleteScriptFilesAfterExecution");
+            if (deleteScript)
+            {
+                _logger.LogDebug("Deleting file : {file}" , FilePath);
+                return Task.Run(() => File.Delete(FilePath));
+            }
+            else
+            {
+                _logger.LogWarning("File will not be deleted as requested by configuration option 'DeleteScriptFilesAfterExecution'");
+                return Task.CompletedTask;
+            }
+        }
+
         private async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
         {
             return await Task.Run(() =>
@@ -183,69 +161,6 @@ namespace ScriptAtRestServer.Services
                     ErrorOutput = errorOutput
                 };
             });
-        }
-
-        private Process CreateProcess(string processArgs, string fileName)
-        {
-            return new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    FileName = fileName,
-                    Arguments = processArgs
-                }
-            };
-        }
-        #endregion
-
-        #region obsolete
-
-        public async Task<ProcessModel> RunScript(ScriptEnums.ScriptType Type, string Name, string Parameters) => await Task.Run(() =>
-        {
-            string processArgs = string.Empty;
-            switch (Type)
-            {
-                case ScriptEnums.ScriptType.Shell:
-                    processArgs = $" {Name.TrimEnd()} {Parameters}";
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    processArgs = $" -f {Name.TrimEnd()} {Parameters}";
-                    break;
-            }
-
-            Process process = CreateProcess(Type, processArgs);
-            process.Start();
-
-            string output = process.StandardOutput.ReadToEnd();
-            string errorOutput = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            return new ProcessModel
-            {
-                ExitCode = process.ExitCode,
-                Output = output,
-                ErrorOutput = errorOutput
-            };
-        });
-        private static Process CreateProcess(ScriptEnums.ScriptType Type, string processArgs)
-        {
-            return new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Scripts"),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    FileName = Type == ScriptEnums.ScriptType.PowerShell ? "powershell.exe" : "cmd /c",
-                    Arguments = processArgs
-                }
-            };
         }
         #endregion
     }
