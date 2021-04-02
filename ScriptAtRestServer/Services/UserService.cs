@@ -75,6 +75,10 @@ namespace ScriptAtRestServer.Services
                 _context.Users.Remove(user);
                 _context.SaveChanges();
             }
+            else
+            {
+                throw new AppException("User with requested id not found");
+            }
         }
     }
 }
