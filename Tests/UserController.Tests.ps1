@@ -4,16 +4,14 @@ param (
     $UserPassword,
     $apiUrl
 )
-
-Describe "User Controller Tests" {
-    BeforeAll{
-        $exeFile = Join-Path -Path $ApplicationFolder -ChildPath "ScriptAtRestServer.exe"
-        $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,$UserPassword)))
-        
-        $process = Start-Process -FilePath $exeFile -WorkingDirectory $ApplicationFolder -PassThru
-        Start-Sleep -Seconds 5
-    }
-
+BeforeAll {
+    $exeFile = Join-Path -Path $ApplicationFolder -ChildPath "ScriptAtRestServer.exe"
+    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,$UserPassword)))
+    
+    $process = Start-Process -FilePath $exeFile -WorkingDirectory $ApplicationFolder -PassThru
+    Start-Sleep -Seconds 5
+}
+Describe "New user registration tests" {
     It "Register new user" {
         $body = @{
             "firstname" = "Test"
@@ -53,7 +51,9 @@ Describe "User Controller Tests" {
         ($err.ErrorDetails.Message | ConvertFrom-Json).message | Should -BeExactly ("Username : $Username is already taken")
         
     }
+}
 
+Describe "Get users tests" {
     It "Get all users" {
 
         $response = Invoke-RestMethod `
@@ -64,6 +64,24 @@ Describe "User Controller Tests" {
         $response.Count | Should -BeGreaterOrEqual 1
     }
 
+    It "Fail getting all users with wrong credentials" {
+        $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,'wrong_password')))
+        $err
+        try {            
+            $response = Invoke-RestMethod `
+                -Method Get `
+                -Uri "$apiUrl/users" `
+                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        }
+        catch {
+            $err = $_
+        }
+
+        $err.Exception.Response.StatusCode | Should -BeExactly 'Unauthorized'
+    }
+}
+
+Describe "User deletion tests" {
     It "Fail deleting non-existing user" {
         $err
         try {
@@ -92,25 +110,9 @@ Describe "User Controller Tests" {
             -Uri "$apiUrl/users/$($user.id)" `
             -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
     }
-
-    It "Fail getting all users with wrong credentials" {
-        $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,'wrong_password')))
-        $err
-        try {            
-            $response = Invoke-RestMethod `
-                -Method Get `
-                -Uri "$apiUrl/users" `
-                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
-        }
-        catch {
-            $err = $_
-        }
-
-        $err.Exception.Response.StatusCode | Should -BeExactly 'Unauthorized'
-    }
+}
     
-    AfterAll{
-        Start-Sleep -Seconds 10
-        Stop-Process -InputObject $process -Force
-    }
+AfterAll{
+    Start-Sleep -Seconds 5
+    Stop-Process -InputObject $process -Force
 }
