@@ -49,6 +49,16 @@ Describe "Script controller tests" {
         
         $response.name | should -BeExactly $ScriptName
     }
+
+    It "Get the script by id '1'" {
+        $response = Invoke-RestMethod `
+            -Method Get `
+            -Uri "$apiUrl/scripts/1" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.id | should -BeExactly 1
+        $response.name | should -BeExactly $ScriptName
+    }
 }
 
 AfterAll {
