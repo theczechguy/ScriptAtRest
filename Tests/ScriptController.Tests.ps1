@@ -8,6 +8,7 @@ param (
 BeforeAll {
     $exeFile = Join-Path -Path $ApplicationFolder -ChildPath "ScriptAtRestServer.exe"
     $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,$UserPassword)))
+    Get-ChildItem -Path $ApplicationFolder -Filter "LocalDatabase.db" | Remove-Item -Force
     
     $process = Start-Process -FilePath $exeFile -WorkingDirectory $ApplicationFolder -PassThru
     Start-Sleep -Seconds 5
@@ -34,10 +35,10 @@ Describe "Script controller tests" {
         $encoded =[Convert]::ToBase64String($Bytes)
 
         $body = @{
-            "name" = $ScriptName
+            "Name" = $ScriptName
             "EncodedContent" = $encoded
-            "type" = 1
-        }
+            "Type" = 1
+        } | ConvertTo-Json
 
         $response = Invoke-RestMethod `
             -Method Post `
@@ -62,5 +63,6 @@ Invoke-RestMethod `
     -Uri "$apiUrl/users/$($user.id)" `
     -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
 
+    Start-Sleep -Seconds 10
     Stop-Process -InputObject $process -Force
 }
