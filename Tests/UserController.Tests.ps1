@@ -31,6 +31,29 @@ Describe "User Controller Tests" {
         $response.message | Should -Be "User Registered"
     }
 
+    It "Fail registering the same user again" {
+        $body = @{
+            "firstname" = "Test"
+            "lastname" = "Test"
+            "username" = $Username
+            "password" = $UserPassword
+        } | ConvertTo-Json
+
+        try {
+            $err
+            $response = Invoke-RestMethod `
+                -Method Post `
+                -Uri "$apiUrl/users/register" `
+                -Body $body `
+                -ContentType "application/json"
+        }
+        catch {
+            $err = $_
+        }
+        ($err.ErrorDetails.Message | ConvertFrom-Json).message | Should -BeExactly ("Username : $Username is already taken")
+        
+    }
+
     It "Get all users" {
 
         $response = Invoke-RestMethod `
@@ -52,8 +75,7 @@ Describe "User Controller Tests" {
         catch {
           $err = $_
         }
-        
-        Write-Host ($err | fl -Force | Out-String)
+
         ($err.ErrorDetails.Message | ConvertFrom-Json).message | Should -BeExactly 'User with requested id not found'
     }
 
