@@ -19,7 +19,7 @@ BeforeAll {
         "password" = $UserPassword
     } | ConvertTo-Json
 
-    $response = Invoke-RestMethod `
+    $testUserResponse = Invoke-RestMethod `
         -Method Post `
         -Uri "$apiUrl/users/register" `
         -Body $body `
@@ -43,8 +43,24 @@ Describe "Script controller tests" {
             -Method Post `
             -Uri "$apiUrl/scripts/register" `
             -Body $body `
-            -ContentType "application/json"
+            -ContentType "application/json" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
         
         $response.name | should -BeExactly $ScriptName
     }
+}
+
+AfterAll {
+    $response = Invoke-RestMethod `
+        -Method Get `
+        -Uri "$apiUrl/users" `
+        -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+    $user = $response | where username -eq $Username
+
+Invoke-RestMethod `
+    -Method Delete `
+    -Uri "$apiUrl/users/$($user.id)" `
+    -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+
+    Stop-Process -InputObject $process -Force
 }
