@@ -59,6 +59,15 @@ Describe "Script controller tests" {
         $response.id | should -BeExactly 1
         $response.name | should -BeExactly $ScriptName
     }
+
+    It "Get all scripts - should retrieve at least 1" {
+        $response = Invoke-RestMethod `
+        -Method Get `
+        -Uri "$apiUrl/scripts" `
+        -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.count | Should -BeGreaterOrEqual 1
+    }
 }
 
 AfterAll {
