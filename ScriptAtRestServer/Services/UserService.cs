@@ -53,7 +53,7 @@ namespace ScriptAtRestServer.Services
                 throw new AppException("Password is required");
 
             if (_context.Users.Any(x => x.Username == user.Username))
-                throw new AppException("Username \"" + user.Username + "\" is already taken");
+                throw new AppException(string.Format("Username : {0} is already taken" , user.Username));
 
             byte[] passwordHash, passwordSalt;
             PasswordHashHelpers.CreatePasswordHash(password, out passwordHash, out passwordSalt);
