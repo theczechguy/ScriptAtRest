@@ -93,7 +93,7 @@ Describe "Script controller tests" {
                     'EncodedValue' = $param2
                 }
             )
-        } | ConvertFrom-Json
+        } | ConvertTo-Json
 
         $response = Invoke-RestMethod `
             -Method Post `
