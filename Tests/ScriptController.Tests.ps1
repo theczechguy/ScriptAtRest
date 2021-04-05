@@ -33,7 +33,7 @@ BeforeAll {
 
 Describe "Script controller tests" {
     It "Register a new script" {
-        $script = Get-Content .\TestScript.ps1
+        $script = Get-Content .\TestScript.ps1 -Encoding utf8 -Raw
 
         $Bytes = [System.Text.Encoding]::UTF8.GetBytes($script)
         $encoded =[Convert]::ToBase64String($Bytes)
@@ -114,5 +114,5 @@ Describe "Script controller tests" {
 
 AfterAll {
     Start-Sleep -Seconds 10
-    Stop-Process -InputObject $process -Force
+    #Stop-Process -InputObject $process -Force
 }
