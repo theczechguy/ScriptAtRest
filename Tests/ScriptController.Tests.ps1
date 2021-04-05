@@ -68,6 +68,42 @@ Describe "Script controller tests" {
         
         $response.count | Should -BeGreaterOrEqual 1
     }
+
+    It "Execute test script with parameters" {
+
+            $param1 = "prvni"
+
+            $Bytes = [System.Text.Encoding]::UTF8.GetBytes($param1)
+            $param1 =[Convert]::ToBase64String($Bytes)
+
+            $param2 = "druhy"
+            $Bytes = [System.Text.Encoding]::UTF8.GetBytes($param2)
+            $param2 =[Convert]::ToBase64String($Bytes)
+
+
+        $body = @{
+            "Parameters" = @(
+                @{
+                    "Name"= 'prvni'
+                    'EncodedValue' = $param1
+
+                },
+                @{
+                    "Name"= 'druhy'
+                    'EncodedValue' = $param2
+                }
+            )
+        } | ConvertFrom-Json
+
+        $response = Invoke-RestMethod `
+            -Method Post `
+            -Uri "$apiUrl/scripts/run/1" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.exitcode | should -BeExactly 0
+        $response.errorOutput | should -BeNullOrEmpty
+        $response.output | should -BeLike "*Tohle je druhy parameter : $param1"
+    }
 }
 
 AfterAll {
