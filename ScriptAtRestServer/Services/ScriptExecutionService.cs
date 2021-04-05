@@ -145,7 +145,7 @@ namespace ScriptAtRestServer.Services
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         FileName = fileName,
-                        Arguments = processArgs
+                        Arguments = processArgs,
                     }
                 };
                 process.Start();
