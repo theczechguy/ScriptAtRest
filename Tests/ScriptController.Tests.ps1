@@ -103,12 +103,12 @@ Describe "Script controller tests" {
             -Method Post `
             -Uri "$apiUrl/scripts/run/1" `
             -ContentType "application/json" `
-            -Body $body
+            -Body $body `
             -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
         
         $response.exitcode | should -BeExactly 0
         $response.errorOutput | should -BeNullOrEmpty
-        $response.output | should -BeLike "*Tohle je druhy parameter : $param2*"
+        $response.output | should -BeLike "*Tohle je druhy parameter*"
     }
 }
 
