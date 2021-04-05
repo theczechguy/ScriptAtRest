@@ -108,11 +108,11 @@ Describe "Script controller tests" {
         
         $response.exitcode | should -BeExactly 0
         $response.errorOutput | should -BeNullOrEmpty
-        $response.output | should -BeLike "*Tohle je druhy parameter*"
+        $response.output | should -BeLike "*Tohle je prvni parameter : $param1*"
     }
 }
 
 AfterAll {
-    Start-Sleep -Seconds 10
-    #Stop-Process -InputObject $process -Force
+    Start-Sleep -Seconds 5
+    Stop-Process -InputObject $process -Force
 }
