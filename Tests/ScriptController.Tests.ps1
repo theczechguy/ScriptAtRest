@@ -98,6 +98,7 @@ Describe "Script controller tests" {
         $response = Invoke-RestMethod `
             -Method Post `
             -Uri "$apiUrl/scripts/run/1" `
+            -ContentType "application/json" `
             -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
         
         $response.exitcode | should -BeExactly 0
