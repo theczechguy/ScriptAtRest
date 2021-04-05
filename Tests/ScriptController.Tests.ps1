@@ -78,23 +78,23 @@ Describe "Script controller tests" {
             $param1 = "prvni"
 
             $Bytes = [System.Text.Encoding]::UTF8.GetBytes($param1)
-            $param1 =[Convert]::ToBase64String($Bytes)
+            $param1Encoded =[Convert]::ToBase64String($Bytes)
 
             $param2 = "druhy"
             $Bytes = [System.Text.Encoding]::UTF8.GetBytes($param2)
-            $param2 =[Convert]::ToBase64String($Bytes)
+            $param2Encoded =[Convert]::ToBase64String($Bytes)
 
 
         $body = @{
             "Parameters" = @(
                 @{
                     "Name"= 'prvni'
-                    'EncodedValue' = $param1
+                    'EncodedValue' = $param1Encoded
 
                 },
                 @{
                     "Name"= 'druhy'
-                    'EncodedValue' = $param2
+                    'EncodedValue' = $param2Encoded
                 }
             )
         } | ConvertTo-Json
@@ -103,26 +103,16 @@ Describe "Script controller tests" {
             -Method Post `
             -Uri "$apiUrl/scripts/run/1" `
             -ContentType "application/json" `
+            -Body $body
             -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
         
         $response.exitcode | should -BeExactly 0
         $response.errorOutput | should -BeNullOrEmpty
-        $response.output | should -BeLike "*Tohle je druhy parameter : $param1"
+        $response.output | should -BeLike "*Tohle je druhy parameter : $param2*"
     }
 }
 
 AfterAll {
-    $response = Invoke-RestMethod `
-        -Method Get `
-        -Uri "$apiUrl/users" `
-        -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
-    $user = $response | where username -eq $Username
-
-Invoke-RestMethod `
-    -Method Delete `
-    -Uri "$apiUrl/users/$($user.id)" `
-    -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
-
     Start-Sleep -Seconds 10
     Stop-Process -InputObject $process -Force
 }
