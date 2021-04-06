@@ -37,6 +37,10 @@ namespace ScriptAtRestServer.Services
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
         {
             Script script = _context.Scripts.Find(id);
+            if (script == null)
+            {
+                throw new AppException("Script not found in database");
+            }
 
             string scriptContent = script.Content;
             ScriptEnums.ScriptType scriptType = script.Type;
@@ -53,10 +57,6 @@ namespace ScriptAtRestServer.Services
                 ProcessModel processModel = await RunProcessAsync(processArgs, fileName);
                 _logger.LogDebug("Process result : {@model}" , processModel);
                 return processModel;
-            }
-            catch (Exception)
-            {
-                throw;
             }
             finally {
                 await DeleteScriptFileAsync(scriptFilePath);
