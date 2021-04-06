@@ -110,6 +110,20 @@ Describe "Script controller tests" {
         $response.errorOutput | should -BeNullOrEmpty
         $response.output | should -BeLike "*Tohle je prvni parameter : $param1*"
     }
+
+    It "Delete the script by id '1'" {
+        $err
+        try {
+            $response = Invoke-RestMethod `
+                -Method Delete `
+                -Uri "$apiUrl/scripts/1" `
+                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
+        }
+        catch {
+            $err = $_
+        }
+        $err | should -BeNullOrEmpty
+    }
 }
 
 AfterAll {
