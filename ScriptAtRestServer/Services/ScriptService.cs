@@ -79,5 +79,17 @@ namespace ScriptAtRestServer.Services
                 _context.SaveChanges();
             }
         }
+
+        public ScriptType CreateType(ScriptType ScriptType) {
+            if (_context.ScriptTypes.Any(x => x.Name == ScriptType.Name))
+            {
+                throw new AppException("Scriptname is already taken");
+            }
+
+            _context.ScriptTypes.Add(ScriptType);
+            _context.SaveChanges();
+
+            return ScriptType;
+        }
     }
 }
