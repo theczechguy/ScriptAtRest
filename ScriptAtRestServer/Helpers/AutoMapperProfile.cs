@@ -2,6 +2,7 @@ using AutoMapper;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Users;
 using ScriptAtRestServer.Models.Scripts;
+using ScriptAtRestServer.Models.ScriptTypes;
 
 namespace WebApi.Helpers
 {
@@ -14,6 +15,9 @@ namespace WebApi.Helpers
 
             CreateMap<Script, ScriptModel>();
             CreateMap<RegisterScriptModel, Script>();
+
+            CreateMap<ScriptType, ScriptTypeModel>();
+            CreateMap<RegisterScriptTypeModel, ScriptType>();
         }
     }
 }
