@@ -80,14 +80,14 @@ namespace ScriptAtRestServer.Services
             }
         }
 
-        public ScriptType CreateType(ScriptType ScriptType) {
+        public async Task<ScriptType> CreateTypeAsync(ScriptType ScriptType) {
             if (_context.ScriptTypes.Any(x => x.Name == ScriptType.Name))
             {
                 throw new AppException("Scriptname is already taken");
             }
 
             _context.ScriptTypes.Add(ScriptType);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return ScriptType;
         }
