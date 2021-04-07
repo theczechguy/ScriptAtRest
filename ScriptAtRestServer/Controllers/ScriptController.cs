@@ -127,7 +127,8 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("type")]
-        public async Task<IActionResult> RegisterScriptType([FromBody] RegisterScriptTypeModel Model) {
+        public async Task<IActionResult> RegisterScriptType([FromBody] RegisterScriptTypeModel Model)
+        {
             _logger.LogInformation("Register new script type");
             try
             {
@@ -146,6 +147,28 @@ namespace ScriptAtRestServer.Controllers
             catch (Exception ex) 
             {
                 _logger.LogError(ex , "Fatal failure during script type registration");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpDelete("type/{id}")]
+        public IActionResult DeleteScriptType(int Id)
+        {
+            _logger.LogInformation("Delete script type with id : {id}" , Id);
+            try
+            {
+                _scriptService.DeleteType(Id);
+                _logger.LogInformation("Script type deleted");
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, "Failed to delete script type");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure during scrip type deletion");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
