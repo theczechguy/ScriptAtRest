@@ -45,7 +45,7 @@ BeforeAll {
         -ContentType "application/json"
 }
 
-Describe "Script controller tests" {
+Describe "Script operation tests" {
     It "Register a new script" {
         $script = Get-Content .\TestScript.ps1 -Encoding utf8 -Raw
 
@@ -137,6 +137,12 @@ Describe "Script controller tests" {
             $err = $_
         }
         $err | should -BeNullOrEmpty
+    }
+}
+
+Describe "Script type tests" {
+    It "Registers a new script type" {
+
     }
 }
 
