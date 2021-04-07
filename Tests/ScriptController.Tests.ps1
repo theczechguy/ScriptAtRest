@@ -143,7 +143,7 @@ Describe "Script operation tests" {
 }
 
 Describe "Script type tests" {
-    It "Registers a new script type" {
+    It "Register a new script type" {
         $body = @{
             "Name" = $scriptTypeName
             "Runner" = $scriptTypeRunner
