@@ -97,5 +97,34 @@ namespace ScriptAtRestServer.Services
 
             return ScriptType;
         }
+
+        public Task<ScriptType> UpdateTypeAsync(int Id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteType(int Id)
+        {
+            ScriptType type = _context.ScriptTypes.Find(Id);
+            if (type != null)
+            {
+                _context.ScriptTypes.Remove(type);
+                _context.SaveChanges();
+            }
+            else 
+            {
+                throw new AppException("Script type with requested id not found");
+            }
+        }
+
+        public IEnumerable<ScriptType> GetAllTypes()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ScriptType GetTypeById()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
