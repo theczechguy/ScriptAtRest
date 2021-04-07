@@ -8,14 +8,28 @@ param (
 BeforeAll {
     $InformationPreference = 'continue'
 
-    $exeFile = Join-Path -Path $ApplicationFolder -ChildPath "ScriptAtRestServer.exe"
-    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,$UserPassword)))
-    Write-Information "Deleting localdatabase.db"
-    Get-ChildItem -Path $ApplicationFolder -Filter "LocalDatabase.db" | Remove-Item -Force
-    
-    Write-Information "Starting api"
-    $process = Start-Process -FilePath $exeFile -WorkingDirectory $ApplicationFolder -PassThru
-    Start-Sleep -Seconds 5
+    #region script type tests
+        $scriptTypeName = 'Test Type'
+        $scriptTypeRunner = "pwsh.exe"
+        $scriptTypeFileExtension = 'ps.1'
+        $scriptTypeArgument = '-f'
+    #endregion
+
+    #region remove local database
+        Write-Information "Deleting localdatabase.db"
+        Get-ChildItem -Path $ApplicationFolder -Filter "LocalDatabase.db" | Remove-Item -Force
+    #endregion
+
+    #region auth
+        $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Username,$UserPassword)))
+    #endregion
+
+    #region start api
+        Write-Information "Starting api"
+        $exeFile = Join-Path -Path $ApplicationFolder -ChildPath "ScriptAtRestServer.exe"
+        $process = Start-Process -FilePath $exeFile -WorkingDirectory $ApplicationFolder -PassThru
+        Start-Sleep -Seconds 5
+    #endregion
 
     $body = @{
         "firstname" = "Test"
