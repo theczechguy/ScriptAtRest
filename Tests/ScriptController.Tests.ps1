@@ -31,18 +31,20 @@ BeforeAll {
         Start-Sleep -Seconds 5
     #endregion
 
-    $body = @{
-        "firstname" = "Test"
-        "lastname" = "Test"
-        "username" = $Username
-        "password" = $UserPassword
-    } | ConvertTo-Json
+    #region register test user
+        $body = @{
+            "firstname" = "Test"
+            "lastname" = "Test"
+            "username" = $Username
+            "password" = $UserPassword
+        } | ConvertTo-Json
 
-    $testUserResponse = Invoke-RestMethod `
-        -Method Post `
-        -Uri "$apiUrl/users/register" `
-        -Body $body `
-        -ContentType "application/json"
+        $testUserResponse = Invoke-RestMethod `
+            -Method Post `
+            -Uri "$apiUrl/users/register" `
+            -Body $body `
+            -ContentType "application/json"
+    #endregion
 }
 
 Describe "Script operation tests" {
