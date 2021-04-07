@@ -10,7 +10,6 @@ namespace ScriptAtRestServer.Entities
         public string TypeName { get; set; }
         public string Runner { get; set; }
         public string FileExtension { get; set; }
-        public string FileParameter { get; set; }
-
+        public string ScriptArgument { get; set; }
     }
 }
