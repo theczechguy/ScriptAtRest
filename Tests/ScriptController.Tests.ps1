@@ -142,7 +142,24 @@ Describe "Script operation tests" {
 
 Describe "Script type tests" {
     It "Registers a new script type" {
+        $body = @{
+            "Name" = $scriptTypeName
+            "Runner" = $scriptTypeRunner
+            "FileExtension" = $scriptTypeFileExtension
+            "ScriptArgument" = $scriptTypeArgument
+        } | ConvertTo-Json
 
+        $response = Invoke-RestMethod `
+            -Method Post `
+            -Uri "$apiUrl/scripts/type" `
+            -Body $body `
+            -ContentType "application/json" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.name | should -BeExactly $scriptTypeName
+        $response.id | should -not -BeNullOrEmpty
+        $response.FileExtension | should -be $scriptTypeFileExtension
+        $response.ScriptArgument | should -be $scriptTypeArgument
     }
 }
 
