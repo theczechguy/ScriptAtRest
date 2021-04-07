@@ -163,6 +163,20 @@ Describe "Script type tests" {
         $response.FileExtension | should -be $scriptTypeFileExtension
         $response.ScriptArgument | should -be $scriptTypeArgument
     }
+
+    It "Delete script type with id 1" {
+        $err
+        try {
+            $response = Invoke-RestMethod `
+                -Method Delete `
+                -Uri "$apiUrl/scripts/type/1" `
+                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
+        }
+        catch {
+            $err = $_
+        }
+        $err | Should -BeNullOrEmpty
+    }
 }
 
 AfterAll {
