@@ -131,7 +131,11 @@ namespace ScriptAtRestServer.Controllers
             _logger.LogInformation("Register new script type");
             try
             {
-                return Ok();
+                ScriptType scriptType = _mapper.Map<ScriptType>(Model);
+                scriptType = await _scriptService.CreateTypeAsync(scriptType);
+                ScriptTypeModel scriptTypeModel = _mapper.Map<ScriptTypeModel>(scriptType);
+                _logger.LogInformation("Registered new script type with id : {id}", scriptTypeModel.Id);
+                return Ok(scriptTypeModel);
             }
             catch (AppException ex)
             {
