@@ -7,6 +7,7 @@ namespace ScriptAtRestServer.Entities
 {
     public class ScriptType
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Runner { get; set; }
         public string FileExtension { get; set; }
