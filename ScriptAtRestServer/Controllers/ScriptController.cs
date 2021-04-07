@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
+using ScriptAtRestServer.Models.ScriptTypes;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System;
-using System.Text;
-using ScriptAtRestServer.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -123,6 +123,25 @@ namespace ScriptAtRestServer.Controllers
             {
                 _logger.LogError(ex, "Failed to execute script");
                 return BadRequest(new { message = "Failed to execute script" });
+            }
+        }
+
+        [HttpPost("type")]
+        public async Task<IActionResult> RegisterScriptType([FromBody] RegisterScriptTypeModel Model) {
+            _logger.LogInformation("Register new script type");
+            try
+            {
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, "Failed to register script type");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex , "Fatal failure during script type registration");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
     }
