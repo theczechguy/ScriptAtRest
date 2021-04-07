@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ScriptAtRestServer.Models.ScriptTypes
 {
-    public class ScriptType
+    public class RegisterScriptTypeModel
     {
         [Required]
         public string Name { get; set; }
