@@ -15,6 +15,7 @@ namespace ScriptAtRestServer.Services
         IEnumerable<Script> GetAll();
         Script GetById(int id);
         void Delete(int id);
+        Task<ScriptType> CreateTypeAsync(ScriptType ScriptType);
     }
     public class ScriptService : IScriptService
     {
