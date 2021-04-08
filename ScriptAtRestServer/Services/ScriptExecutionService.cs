@@ -93,21 +93,6 @@ namespace ScriptAtRestServer.Services
             return stringBuilder.ToString();
         }
 
-        private void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
-        {
-            switch (scriptType)
-            {
-                case ScriptEnums.ScriptType.PowerShell:
-                    scriptSuffix = ".ps1";
-                    fileName = "powershell.exe";
-                    break;
-                default:
-                    scriptSuffix = ".cmd";
-                    fileName = "cmd.exe";
-                    break;
-            }
-        }
-
         private string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
         {
             string tempFilePath = Path.GetTempFileName();
