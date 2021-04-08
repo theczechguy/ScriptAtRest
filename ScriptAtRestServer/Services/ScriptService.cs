@@ -36,6 +36,11 @@ namespace ScriptAtRestServer.Services
                 throw new AppException("Scriptname is already taken");
             }
 
+            if (_context.ScriptTypes.Find(Script.Type) == null)
+            {
+                throw new AppException("Script type is not registered");
+            }
+
             _context.Scripts.Add(Script);
             _context.SaveChanges();
 
