@@ -65,18 +65,17 @@ namespace ScriptAtRestServer.Services
         }
 
         #region helper methods
-        private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
+        private string PrepareScriptArguments(ScriptType ScriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
             StringBuilder stringBuilder = new StringBuilder();
-
-            switch (scriptType)
+            
+            if (ScriptType.ScriptArgument != null)
             {
-                case ScriptEnums.ScriptType.Shell:
-                    stringBuilder.Append(string.Format(" /c {0}" , scriptFilePath)); // /c c:/f/script.cmd
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    stringBuilder.Append(string.Format(" -f {0}", scriptFilePath)); // -f c:/f/script.ps1
-                    break;
+                stringBuilder.AppendFormat(" {0} {1}", ScriptType.ScriptArgument, scriptFilePath);
+            }
+            else
+            {
+                stringBuilder.AppendFormat(" {0}" , scriptFilePath);
             }
 
             if (paramArray == null)
