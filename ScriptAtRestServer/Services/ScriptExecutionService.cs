@@ -51,7 +51,6 @@ namespace ScriptAtRestServer.Services
             _logger.LogDebug("Script file : {fullPath}" , scriptFilePath);
 
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
-            _logger.LogDebug("Process arguments : {args}" , processArgs);
 
             try
             {
@@ -136,6 +135,9 @@ namespace ScriptAtRestServer.Services
         {
             return await Task.Run(() =>
             {
+                _logger.LogDebug("Process runner : {runner}" , fileName);
+                _logger.LogDebug("Process arguments : {args}", processArgs);
+
                 using Process process = new Process
                 {
                     StartInfo = new ProcessStartInfo
