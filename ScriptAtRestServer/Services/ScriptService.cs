@@ -129,7 +129,7 @@ namespace ScriptAtRestServer.Services
 
         public ScriptType GetTypeById(int Id)
         {
-            ScriptType type = _context.ScriptTypes.Find();
+            ScriptType type = _context.ScriptTypes.Find(Id);
             if (type == null)
             {
                 throw new AppException("Script type with specified id not found");
