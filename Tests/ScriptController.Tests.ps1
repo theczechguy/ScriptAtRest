@@ -47,6 +47,64 @@ BeforeAll {
     #endregion
 }
 
+Describe "Script type tests" {
+    It "Register a new script type" {
+        $body = @{
+            "Name" = $scriptTypeName
+            "Runner" = $scriptTypeRunner
+            "FileExtension" = $scriptTypeFileExtension
+            "ScriptArgument" = $scriptTypeArgument
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod `
+            -Method Post `
+            -Uri "$apiUrl/scripts/type" `
+            -Body $body `
+            -ContentType "application/json" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.name | should -BeExactly $scriptTypeName
+        $response.id | should -not -BeNullOrEmpty
+        $response.FileExtension | should -be $scriptTypeFileExtension
+        $response.ScriptArgument | should -be $scriptTypeArgument
+    }
+
+    It "Delete script type with id 1" {
+        $err
+        try {
+            $response = Invoke-RestMethod `
+                -Method Delete `
+                -Uri "$apiUrl/scripts/type/1" `
+                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
+        }
+        catch {
+            $err = $_
+        }
+        $err | Should -BeNullOrEmpty
+    }
+
+    It "Register new script type that will be used in next tests" {
+        $body = @{
+            "Name" = $scriptTypeName
+            "Runner" = $scriptTypeRunner
+            "FileExtension" = $scriptTypeFileExtension
+            "ScriptArgument" = $scriptTypeArgument
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod `
+            -Method Post `
+            -Uri "$apiUrl/scripts/type" `
+            -Body $body `
+            -ContentType "application/json" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.name | should -BeExactly $scriptTypeName
+        $response.id | should -not -BeNullOrEmpty
+        $response.FileExtension | should -be $scriptTypeFileExtension
+        $response.ScriptArgument | should -be $scriptTypeArgument
+    }
+}
+
 Describe "Script operation tests" {
     It "Register a new script" {
         $script = Get-Content .\TestScript.ps1 -Encoding utf8 -Raw
@@ -57,7 +115,7 @@ Describe "Script operation tests" {
         $body = @{
             "Name" = $ScriptName
             "EncodedContent" = $encoded
-            "Type" = 1
+            "Type" = 2
         } | ConvertTo-Json
 
         $response = Invoke-RestMethod `
@@ -139,43 +197,6 @@ Describe "Script operation tests" {
             $err = $_
         }
         $err | should -BeNullOrEmpty
-    }
-}
-
-Describe "Script type tests" {
-    It "Register a new script type" {
-        $body = @{
-            "Name" = $scriptTypeName
-            "Runner" = $scriptTypeRunner
-            "FileExtension" = $scriptTypeFileExtension
-            "ScriptArgument" = $scriptTypeArgument
-        } | ConvertTo-Json
-
-        $response = Invoke-RestMethod `
-            -Method Post `
-            -Uri "$apiUrl/scripts/type" `
-            -Body $body `
-            -ContentType "application/json" `
-            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
-        
-        $response.name | should -BeExactly $scriptTypeName
-        $response.id | should -not -BeNullOrEmpty
-        $response.FileExtension | should -be $scriptTypeFileExtension
-        $response.ScriptArgument | should -be $scriptTypeArgument
-    }
-
-    It "Delete script type with id 1" {
-        $err
-        try {
-            $response = Invoke-RestMethod `
-                -Method Delete `
-                -Uri "$apiUrl/scripts/type/1" `
-                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
-        }
-        catch {
-            $err = $_
-        }
-        $err | Should -BeNullOrEmpty
     }
 }
 
