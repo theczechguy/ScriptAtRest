@@ -25,13 +25,16 @@ namespace ScriptAtRestServer.Services
         private ILogger<ScriptExecutionService> _logger;
         private SqLiteDataContext _context;
         protected readonly IConfiguration _configuration;
+        private ScriptService _scriptService;
         public ScriptExecutionService(
             SqLiteDataContext Context ,
             ILogger<ScriptExecutionService> Logger,
-            IConfiguration Configuration) {
+            IConfiguration Configuration,
+            ScriptService ScriptService) {
             _context = Context;
             _logger = Logger;
             _configuration = Configuration;
+            _scriptService = ScriptService;
         }
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
