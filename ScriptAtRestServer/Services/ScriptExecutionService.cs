@@ -55,8 +55,8 @@ namespace ScriptAtRestServer.Services
 
             try
             {
-                ProcessModel processModel = await RunProcessAsync(processArgs, fileName);
-                _logger.LogDebug("Process result : {@model}" , processModel);
+                ProcessModel processModel = await RunProcessAsync(processArgs, scriptType.Runner);
+                _logger.LogDebug("Process result : {@model}", processModel);
                 return processModel;
             }
             finally {
