@@ -45,13 +45,11 @@ namespace ScriptAtRestServer.Services
                 throw new AppException("Script not found in database");
             }
 
-            string scriptContent = script.Content;
-            ScriptEnums.ScriptType scriptType = script.Type;
-                
-            SelectScriptDetails(scriptType, out string scriptSuffix, out string fileName);
+            ScriptType scriptType = _scriptService.GetTypeById(script.Type);
 
-            string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
+            string scriptFilePath = CreateScriptFileWithContent(script.Content, scriptType.FileExtension);
             _logger.LogDebug("Script file : {fullPath}" , scriptFilePath);
+
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
             _logger.LogDebug("Process arguments : {args}" , processArgs);
 
