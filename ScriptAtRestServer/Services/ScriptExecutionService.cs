@@ -25,12 +25,12 @@ namespace ScriptAtRestServer.Services
         private ILogger<ScriptExecutionService> _logger;
         private SqLiteDataContext _context;
         protected readonly IConfiguration _configuration;
-        private ScriptService _scriptService;
+        private IScriptService _scriptService;
         public ScriptExecutionService(
             SqLiteDataContext Context ,
             ILogger<ScriptExecutionService> Logger,
             IConfiguration Configuration,
-            ScriptService ScriptService) {
+            IScriptService ScriptService) {
             _context = Context;
             _logger = Logger;
             _configuration = Configuration;
