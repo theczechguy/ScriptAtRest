@@ -11,6 +11,7 @@ using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Users;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -45,14 +46,19 @@ namespace ScriptAtRestServer.Controllers
             {
                 // create user
                 User newUser = _userService.Create(user, model.Password);
-                _logger.LogInformation("User registered with id : {userid}" , newUser.Id);
-                return Ok(new { message = "User registered"});
+                _logger.LogInformation("User registered with id : {userid}", newUser.Id);
+                return Ok(new { message = "User registered" });
             }
             catch (AppException ex)
             {
                 // return error message if there was an exception
-                _logger.LogError(ex , "Failed to register new user");
+                _logger.LogError(ex, "Failed to register new user");
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure while registering new user");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
 
