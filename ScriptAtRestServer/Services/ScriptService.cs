@@ -99,7 +99,7 @@ namespace ScriptAtRestServer.Services
             }
 
             _context.ScriptTypes.Add(ScriptType);
-            await _context.SaveChangesAsync();
+            _ = await _context.SaveChangesAsync();
 
             return ScriptType;
         }
@@ -109,13 +109,13 @@ namespace ScriptAtRestServer.Services
             throw new NotImplementedException();
         }
 
-        public void DeleteType(int Id)
+        public async void DeleteType(int Id)
         {
-            ScriptType type = _context.ScriptTypes.Find(Id);
+            ScriptType type = await _context.ScriptTypes.FindAsync(Id);
             if (type != null)
             {
-                _context.ScriptTypes.Remove(type);
-                _context.SaveChanges();
+                _ = _context.ScriptTypes.Remove(type);
+                _ = await _context.SaveChangesAsync();
             }
             else 
             {
