@@ -172,11 +172,14 @@ namespace ScriptAtRestServer.Services
             }
             currentType.ScriptArgument = UpdatedType.ScriptArgument;
 
-            if (await _context.ScriptTypes.AnyAsync(x => x.Name == UpdatedType.Name))
+            if (currentType.Name != UpdatedType.Name)
             {
-                throw new AppException("New script type name is already taken !");
+                if (await _context.ScriptTypes.AnyAsync(x => x.Name == UpdatedType.Name))
+                {
+                    throw new AppException("New script type name is already taken !");
+                }
+                currentType.Name = UpdatedType.Name;
             }
-            currentType.Name = UpdatedType.Name;
 
             _context.ScriptTypes.Update(currentType);
             _ = await _context.SaveChangesAsync();
