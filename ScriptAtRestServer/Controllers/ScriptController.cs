@@ -37,7 +37,8 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterScriptModel Model) {
+        public IActionResult Register([FromBody] RegisterScriptModel Model)
+        {
             _logger.LogInformation("Register new script");
 
             try
@@ -171,6 +172,27 @@ namespace ScriptAtRestServer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fatal failure during scrip type deletion");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpPut("type/{id}")]
+        public async Task<IActionResult> UpdateScriptTypeAsync([FromBody] UpdateScriptTypeModel Model, int Id) {
+            _logger.LogInformation("Update script type with id : {id}" , Id);
+            try
+            {
+                ScriptType scriptType = _mapper.Map<ScriptType>(Model);
+                ScriptType updatedScriptType = await _scriptService.UpdateTypeById(Id, scriptType);
+                return Ok(_mapper.Map<ScriptTypeModel>(updatedScriptType));
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, "Failed to update script type");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure during scrip type update");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
