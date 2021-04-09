@@ -138,6 +138,7 @@ namespace ScriptAtRestServer.Controllers
                 ScriptTypeModel scriptTypeModel = _mapper.Map<ScriptTypeModel>(scriptType);
                 _logger.LogInformation("Registered new script type with id : {id}", scriptTypeModel.Id);
                 _logger.LogDebug("New script type : {@scripttype}" , scriptType);
+
                 return Ok(scriptTypeModel);
             }
             catch (AppException ex)
