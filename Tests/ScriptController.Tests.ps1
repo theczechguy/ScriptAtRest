@@ -135,6 +135,24 @@ Describe "Script type tests" {
         ($err.ErrorDetails.Message | ConvertFrom-Json).message | should -be "New script type name is already taken !"
     }
 
+    It "Get all script types - should be at least 2"{
+        $response = Invoke-RestMethod `
+            -Method Get `
+            -Uri "$apiUrl/scripts/type" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.count | Should -BeGreaterOrEqual 2
+    }
+    It "Get script type by ID" {
+        $response = Invoke-RestMethod `
+            -Method Get `
+            -Uri "$apiUrl/scripts/type/1" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.id | should -BeExactly 1
+        $response.name | should -be $scriptTypeName
+    }
+
     It "Delete script type with id 1" {
         $err
         try {
