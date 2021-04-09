@@ -12,6 +12,7 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -46,8 +47,9 @@ namespace ScriptAtRestServer.Controllers
             {
                 // create user
                 User newUser = _userService.Create(user, model.Password);
-                _logger.LogInformation("User registered with id : {userid}", newUser.Id);
-                return Ok(new { message = "User registered" });
+                UserModel newModel = _mapper.Map<UserModel>(newUser);
+                _logger.LogInformation("User registered with id : {userid}", newModel.Id);
+                return CreatedAtAction(nameof(GetUserByIdAsync), new { Id = newModel.Id }, newModel);
             }
             catch (AppException ex)
             {
@@ -75,6 +77,31 @@ namespace ScriptAtRestServer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fatal failure while getting all users");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        [ActionName("GetUserByIdAsync")]
+        public async Task<IActionResult> GetUserByIdAsync(int Id)
+        {
+            _logger.LogInformation("Get user with id : {id}", Id);
+            try
+            {
+                User user = await _userService.GetByIdAsync(Id);
+                UserModel userModel = _mapper.Map<UserModel>(user);
+                return Ok(userModel);
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                _logger.LogError(ex, "Failed to find user");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
