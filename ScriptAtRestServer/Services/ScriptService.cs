@@ -21,7 +21,7 @@ namespace ScriptAtRestServer.Services
         Task<ScriptType> UpdateTypeAsync(int Id);
         void DeleteType(int Id);
         IEnumerable<ScriptType> GetAllTypes();
-        ScriptType GetTypeById(int Id);
+        ScriptType GetTypeByIdAsync(int Id);
     }
     public class ScriptService : IScriptService
     {
@@ -128,9 +128,9 @@ namespace ScriptAtRestServer.Services
             return _context.ScriptTypes;
         }
 
-        public ScriptType GetTypeById(int Id)
+        public async Task<ScriptType> GetTypeByIdAsync(int Id)
         {
-            ScriptType type = _context.ScriptTypes.Find(Id);
+            ScriptType type = await _context.ScriptTypes.FindAsync(Id);
             if (type == null)
             {
                 throw new AppException("Script type with specified id not found");
