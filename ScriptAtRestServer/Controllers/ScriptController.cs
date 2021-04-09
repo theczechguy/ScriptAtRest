@@ -119,6 +119,11 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogError(ex, "Failed to delete script");
                 return BadRequest(new { message = "Failed to delete script" });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
         }
 
         [HttpPost("run/{id}")]

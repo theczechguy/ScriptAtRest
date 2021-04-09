@@ -98,6 +98,10 @@ namespace ScriptAtRestServer.Services
                 _context.Scripts.Remove(script);
                 _context.SaveChanges();
             }
+            else
+            {
+                throw new AppException("Script with requested id not found");
+            }
         }
 
         public async Task<ScriptType> CreateTypeAsync(ScriptType ScriptType) {
