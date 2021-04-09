@@ -82,11 +82,11 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int Id) {
+        public async Task<IActionResult> GetByIdAsync(int Id) {
             _logger.LogInformation("Get Script with id : {scriptid}", Id);
             try
             {
-                var script = _scriptService.GetById(Id);
+                var script = await _scriptService.GetByIdAsync(Id);
                 var model = _mapper.Map<ScriptModel>(script);
                 _logger.LogInformation("Retrieved script : {scriptName}", model.Name);
                 return Ok(model);
