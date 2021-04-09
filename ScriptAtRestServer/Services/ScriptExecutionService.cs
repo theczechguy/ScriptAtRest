@@ -39,7 +39,7 @@ namespace ScriptAtRestServer.Services
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
         {
-            Script script = _context.Scripts.Find(id);
+            Script script = await _context.Scripts.FindAsync(id);
             if (script == null)
             {
                 throw new AppException($"Script with id {id} not found in database");

@@ -12,17 +12,17 @@ namespace ScriptAtRestServer.Services
 {
 
     public interface IScriptService {
-        Script Create(Script Script);
+        Task<Script> CreateAsync(Script Script);
         IEnumerable<Script> GetAll();
         Task<Script> GetByIdAsync(int Id);
-        void Delete(int id);
+        Task DeleteAsync(int id);
 
         Task<ScriptType> CreateTypeAsync(ScriptType ScriptType);
         Task<ScriptType> UpdateTypeAsync(int Id);
-        void DeleteType(int Id);
         IEnumerable<ScriptType> GetAllTypes();
         Task<ScriptType> GetTypeByIdAsync(int Id);
         Task<ScriptType> UpdateTypeById(int Id, ScriptType UpdatedType);
+        Task DeleteTypeAsync(int Id);
     }
     public class ScriptService : IScriptService
     {
@@ -31,26 +31,26 @@ namespace ScriptAtRestServer.Services
         {
             _context = Context;
         }
-        public Script Create(Script Script)
+        public async Task<Script> CreateAsync(Script Script)
         {
-            if (_context.Scripts.Any(x => x.Name == Script.Name))
+            if (await _context.Scripts.AnyAsync(x => x.Name == Script.Name))
             {
                 throw new AppException("Scriptname is already taken");
             }
 
-            if (_context.ScriptTypes.Find(Script.Type) == null)
+            if (await _context.ScriptTypes.FindAsync(Script.Type) == null)
             {
                 throw new AppException("Script type is not registered");
             }
 
-            _context.Scripts.Add(Script);
-            _context.SaveChanges();
+            _ = _context.Scripts.Add(Script);
+            _ = await _context.SaveChangesAsync();
 
             return Script;
         }
 
-        public void Update(Script Script) {
-            var script = _context.Scripts.Find(Script.Id);
+        public async Task UpdateAsync(Script Script) {
+            var script = await _context.Scripts.FindAsync(Script.Id);
             if (script == null)
             {
                 throw new AppException("Script not found");
@@ -58,20 +58,8 @@ namespace ScriptAtRestServer.Services
             script.Content = Script.Content;
             script.Name = Script.Name;
 
-            _context.Scripts.Update(script);
-            _context.SaveChanges();
-        }
-
-        public void Delete(string Name) {
-            var script = _context.Scripts.Find(Name);
-
-            if (script == null)
-            {
-                throw new AppException("Script not found");
-            }
-
-            _context.Scripts.Remove(script);
-            _context.SaveChanges();
+            _ =_context.Scripts.Update(script);
+            _ = await _context.SaveChangesAsync();
         }
 
         public IEnumerable<Script> GetAll()
@@ -90,13 +78,13 @@ namespace ScriptAtRestServer.Services
             return type;
         }
 
-        public void Delete(int Id)
+        public async Task DeleteAsync(int Id)
         {
-            Script script = _context.Scripts.Find(Id);
+            Script script = await _context.Scripts.FindAsync(Id);
             if (script != null)
             {
-                _context.Scripts.Remove(script);
-                _context.SaveChanges();
+                _ = _context.Scripts.Remove(script);
+                _ = await _context.SaveChangesAsync();
             }
             else
             {
@@ -121,7 +109,7 @@ namespace ScriptAtRestServer.Services
             throw new NotImplementedException();
         }
 
-        public async void DeleteType(int Id)
+        public async Task DeleteTypeAsync(int Id)
         {
             ScriptType type = await _context.ScriptTypes.FindAsync(Id);
             if (type != null)

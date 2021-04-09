@@ -37,7 +37,7 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterScriptModel Model)
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterScriptModel Model)
         {
             _logger.LogInformation("Register new script");
 
@@ -46,7 +46,7 @@ namespace ScriptAtRestServer.Controllers
                 string decodedContent = Base64.DecodeBase64(Model.EncodedContent);
                 Script script = _mapper.Map<Script>(Model);
                 script.Content = decodedContent;
-                Script createdScript = _scriptService.Create(script);
+                Script createdScript = await _scriptService.CreateAsync(script);
 
                 ScriptModel scriptModel = _mapper.Map<ScriptModel>(createdScript);
                 _logger.LogInformation("Script registered with id : {scriptId}" , scriptModel.id);
@@ -104,13 +104,13 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int Id) 
+        public async Task<IActionResult> DeleteAsync(int Id) 
         {
             _logger.LogInformation("Delete script with ID : {scriptid}" , Id);
 
             try
             {
-                _scriptService.Delete(Id);
+                await _scriptService.DeleteAsync(Id);
                 _logger.LogInformation("Script deleted");
                 return Ok();
             }
@@ -154,7 +154,7 @@ namespace ScriptAtRestServer.Controllers
             _logger.LogInformation("Get all script types");
             try
             {
-                var scriptTypes = _scriptService.GetAllTypes();
+                IEnumerable<ScriptType> scriptTypes = _scriptService.GetAllTypes();
                 var model = _mapper.Map<IList<ScriptTypeModel>>(scriptTypes);
                 _logger.LogInformation("Script types retrieved : {typesCOunt}", model.Count);
                 return Ok(model);
@@ -218,12 +218,12 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpDelete("type/{id}")]
-        public IActionResult DeleteScriptType(int Id)
+        public async Task<IActionResult> DeleteScriptTypeAsync(int Id)
         {
             _logger.LogInformation("Delete script type with id : {id}" , Id);
             try
             {
-                _scriptService.DeleteType(Id);
+                await _scriptService.DeleteTypeAsync(Id);
                 _logger.LogInformation("Script type deleted");
                 return Ok();
             }
@@ -240,7 +240,8 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPut("type/{id}")]
-        public async Task<IActionResult> UpdateScriptTypeAsync([FromBody] UpdateScriptTypeModel Model, int Id) {
+        public async Task<IActionResult> UpdateScriptTypeAsync([FromBody] UpdateScriptTypeModel Model, int Id)
+        {
             _logger.LogInformation("Update script type with id : {id}" , Id);
             try
             {
