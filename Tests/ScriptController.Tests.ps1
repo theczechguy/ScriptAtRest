@@ -132,7 +132,7 @@ Describe "Script type tests" {
             $err = $_
         }
         $err | should -not -BeNullOrEmpty
-        $err.message | should -be "New script type name is already taken !"
+        ($err.ErrorDetails.Message | ConvertFrom-Json).message | should -be "New script type name is already taken !"
     }
 
     It "Delete script type with id 1" {
