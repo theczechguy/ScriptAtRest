@@ -2,6 +2,8 @@
 using System.Linq;
 using ScriptAtRestServer.Helpers;
 using ScriptAtRestServer.Entities;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace ScriptAtRestServer.Services
 {
@@ -11,6 +13,7 @@ namespace ScriptAtRestServer.Services
         IEnumerable<User> GetAll();
         User Create(User user, string password);
         void Delete(int id);
+        Task<User> GetByIdAsync(int Id);
     }
 
     public class UserService : IUserService
@@ -38,6 +41,16 @@ namespace ScriptAtRestServer.Services
                 return null;
             }
 
+            return user;
+        }
+
+        public async Task<User> GetByIdAsync(int Id) 
+        {
+            User user = await _context.Users.FindAsync(Id);
+            if (user == null)
+            {
+                throw new AppException("User with requested id not found in database");
+            }
             return user;
         }
 
