@@ -22,6 +22,7 @@ namespace ScriptAtRestServer.Services
         void DeleteType(int Id);
         IEnumerable<ScriptType> GetAllTypes();
         Task<ScriptType> GetTypeByIdAsync(int Id);
+        Task<ScriptType> UpdateTypeById(int Id, ScriptType UpdatedType);
     }
     public class ScriptService : IScriptService
     {
@@ -136,6 +137,51 @@ namespace ScriptAtRestServer.Services
                 throw new AppException("Script type with specified id not found");
             }
             return type;
+        }
+
+        public async Task<ScriptType> UpdateTypeById(int Id, ScriptType UpdatedType)
+        {
+            ScriptType currentType = await _context.ScriptTypes.FindAsync(Id);
+            if (currentType == null)
+            {
+                throw new AppException($"Script type with id {Id} not found in database");
+            }
+            UpdatedType.Id = currentType.Id;
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.FileExtension))
+            {
+                throw new AppException("FileExtension field must not be empty !");
+            }
+            currentType.FileExtension = UpdatedType.FileExtension;
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.Name))
+            {
+                throw new AppException("Name field must not be empty !");
+            }
+            currentType.Name = UpdatedType.Name;
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.Runner))
+            {
+                throw new AppException("Runner field must not be empty !");
+            }
+            currentType.Runner = UpdatedType.Runner;
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.ScriptArgument))
+            {
+                throw new AppException("ScriptArgument field must not be empty !");
+            }
+            currentType.ScriptArgument = UpdatedType.ScriptArgument;
+
+            if (await _context.ScriptTypes.AnyAsync(x => x.Name == UpdatedType.Name))
+            {
+                throw new AppException("New script type name is already taken !");
+            }
+            currentType.Name = UpdatedType.Name;
+
+            _context.ScriptTypes.Update(currentType);
+            _ = await _context.SaveChangesAsync();
+
+            return currentType;
         }
     }
 }
