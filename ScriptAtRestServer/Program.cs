@@ -20,6 +20,7 @@ namespace ScriptAtRestServer
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .WriteTo.Console()
+                .WriteTo.File("log.txt", rollingInterval: RollingInterval.Hour)
                 .CreateLogger();
 
             try
