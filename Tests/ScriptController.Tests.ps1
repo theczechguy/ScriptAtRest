@@ -69,23 +69,9 @@ Describe "Script type tests" {
         $response.ScriptArgument | should -be $scriptTypeArgument
     }
 
-    It "Delete script type with id 1" {
-        $err
-        try {
-            $response = Invoke-RestMethod `
-                -Method Delete `
-                -Uri "$apiUrl/scripts/type/1" `
-                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
-        }
-        catch {
-            $err = $_
-        }
-        $err | Should -BeNullOrEmpty
-    }
-
     It "Register new script type that will be used in next tests" {
         $body = @{
-            "Name" = $scriptTypeName
+            "Name" = "$scriptTypeName-test"
             "Runner" = $scriptTypeRunner
             "FileExtension" = $scriptTypeFileExtension
             "ScriptArgument" = $scriptTypeArgument
@@ -98,10 +84,69 @@ Describe "Script type tests" {
             -ContentType "application/json" `
             -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
         
-        $response.name | should -BeExactly $scriptTypeName
+        $response.name | should -BeExactly "$scriptTypeName-test"
         $response.id | should -not -BeNullOrEmpty
         $response.FileExtension | should -be $scriptTypeFileExtension
         $response.ScriptArgument | should -be $scriptTypeArgument
+    }
+
+    It "Update script name"{
+        $body = @{
+            "Name" = "$scriptTypeName-updated"
+            "Runner" = $scriptTypeRunner
+            "FileExtension" = $scriptTypeFileExtension
+            "ScriptArgument" = $scriptTypeArgument
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod `
+            -Method Put `
+            -Uri "$apiUrl/scripts/type/1" `
+            -Body $body `
+            -ContentType "application/json" `
+            -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
+        
+        $response.name | Should -be "$scriptTypeName-updated"
+        $response.id | should -Be 1
+        $response.FileExtension | should -be $scriptTypeFileExtension
+        $response.ScriptArgument | should -be $scriptTypeArgument
+    }
+
+    It "Fail updating name which already exists" {
+        $body = @{
+            "Name" = "$scriptTypeName-test"
+            "Runner" = $scriptTypeRunner
+            "FileExtension" = $scriptTypeFileExtension
+            "ScriptArgument" = $scriptTypeArgument
+        } | ConvertTo-Json
+
+        $err
+        try {
+            $response = Invoke-RestMethod `
+                -Method Put `
+                -Uri "$apiUrl/scripts/type/1" `
+                -Body $body `
+                -ContentType "application/json" `
+                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
+        }
+        catch {
+            $err = $_
+        }
+        $err | should -not -BeNullOrEmpty
+        $err.message | should -be "New script type name is already taken !"
+    }
+
+    It "Delete script type with id 1" {
+        $err
+        try {
+            $response = Invoke-RestMethod `
+                -Method Delete `
+                -Uri "$apiUrl/scripts/type/1" `
+                -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}   
+        }
+        catch {
+            $err = $_
+        }
+        $err | Should -BeNullOrEmpty
     }
 }
 
