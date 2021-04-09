@@ -150,7 +150,7 @@ Describe "Script type tests" {
             -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}
         
         $response.id | should -BeExactly 1
-        $response.name | should -be $scriptTypeName
+        $response.name | should -be "$scriptTypeName-updated"
     }
 
     It "Delete script type with id 1" {
