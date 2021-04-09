@@ -146,31 +146,29 @@ namespace ScriptAtRestServer.Services
             {
                 throw new AppException($"Script type with id {Id} not found in database");
             }
-            UpdatedType.Id = currentType.Id;
 
             if (string.IsNullOrWhiteSpace(UpdatedType.FileExtension))
             {
                 throw new AppException("FileExtension field must not be empty !");
             }
-            currentType.FileExtension = UpdatedType.FileExtension;
 
             if (string.IsNullOrWhiteSpace(UpdatedType.Name))
             {
                 throw new AppException("Name field must not be empty !");
             }
-            currentType.Name = UpdatedType.Name;
 
             if (string.IsNullOrWhiteSpace(UpdatedType.Runner))
             {
                 throw new AppException("Runner field must not be empty !");
             }
-            currentType.Runner = UpdatedType.Runner;
 
             if (string.IsNullOrWhiteSpace(UpdatedType.ScriptArgument))
             {
                 throw new AppException("ScriptArgument field must not be empty !");
             }
             currentType.ScriptArgument = UpdatedType.ScriptArgument;
+            currentType.Runner = UpdatedType.Runner;
+            currentType.FileExtension = UpdatedType.FileExtension;
 
             if (currentType.Name != UpdatedType.Name)
             {
