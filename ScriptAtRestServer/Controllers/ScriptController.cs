@@ -146,6 +146,30 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
+        [HttpGet("type/{id}")]
+        public async Task<IActionResult> GetScripTypeById(int Id) 
+        {
+            _logger.LogInformation("Get script type with id : {id}" , Id);
+            try
+            {
+                ScriptType scriptType = await _scriptService.GetTypeByIdAsync(Id);
+                var model = _mapper.Map<ScriptTypeModel>(scriptType);
+                _logger.LogInformation("Retrieved script type : {scriptName}", model.Name);
+
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, $"Failed find script type with id {Id}");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Fatal failure while getting script type with id {Id}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
         [HttpPost("type")]
         public async Task<IActionResult> RegisterScriptType([FromBody] RegisterScriptTypeModel Model)
         {
