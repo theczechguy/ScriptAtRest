@@ -29,7 +29,10 @@ Describe "New user registration tests" {
             -Body $body `
             -ContentType "application/json"
         
-        $response.message | Should -Be "User Registered"
+        $response.id | should -not -BeNullOrEmpty
+        $response.Username | Should -be $Username
+        $response.FirstName | should -be 'Test'
+        $response.LastName | should -be 'Test'
     }
 
     It "Fail registering the same user again" {
