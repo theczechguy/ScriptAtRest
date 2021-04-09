@@ -45,7 +45,7 @@ namespace ScriptAtRestServer.Services
                 throw new AppException($"Script with id {id} not found in database");
             }
 
-            ScriptType scriptType = _scriptService.GetTypeById(script.Type);
+            ScriptType scriptType = await _scriptService.GetTypeByIdAsync(script.Type);
 
             string scriptFilePath = CreateScriptFileWithContent(script.Content, scriptType.FileExtension);
             _logger.LogDebug("Script file : {fullPath}" , scriptFilePath);
