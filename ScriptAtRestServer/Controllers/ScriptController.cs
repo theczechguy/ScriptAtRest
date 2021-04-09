@@ -140,6 +140,11 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogError(ex, "Failed to execute script");
                 return BadRequest(new { message = "Failed to execute script" });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
         }
 
 
