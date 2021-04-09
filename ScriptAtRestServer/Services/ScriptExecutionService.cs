@@ -27,7 +27,7 @@ namespace ScriptAtRestServer.Services
         protected readonly IConfiguration _configuration;
         private IScriptService _scriptService;
         public ScriptExecutionService(
-            SqLiteDataContext Context ,
+            SqLiteDataContext Context,
             ILogger<ScriptExecutionService> Logger,
             IConfiguration Configuration,
             IScriptService ScriptService) {
@@ -42,7 +42,7 @@ namespace ScriptAtRestServer.Services
             Script script = _context.Scripts.Find(id);
             if (script == null)
             {
-                throw new AppException("Script not found in database");
+                throw new AppException($"Script with id {id} not found in database");
             }
 
             ScriptType scriptType = _scriptService.GetTypeById(script.Type);
