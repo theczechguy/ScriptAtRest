@@ -72,10 +72,10 @@ namespace ScriptAtRestServer.Controllers
                 var model = _mapper.Map<IList<UserModel>>(users);
                 return Ok(model);
             }
-            catch (AppException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex , "Failed to get users");
-                return BadRequest(new { message = ex.Message });
+                _logger.LogError(ex, "Fatal failure while getting all users");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
 
