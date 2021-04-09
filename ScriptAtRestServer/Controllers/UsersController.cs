@@ -12,6 +12,7 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -75,6 +76,26 @@ namespace ScriptAtRestServer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fatal failure while getting all users");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        public async Task<IActionResult> GetUserByIdAsync(int Id) {
+            _logger.LogInformation("Get user with id : {id}", Id);
+            try
+            {
+                User user = await _userService.GetByIdAsync(Id);
+                return Ok(user);
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                _logger.LogError(ex, "Failed to find user");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
