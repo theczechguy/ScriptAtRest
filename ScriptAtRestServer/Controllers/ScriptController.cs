@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Models.Scripts;
+using ScriptAtRestServer.Models.ScriptTypes;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System;
-using System.Text;
-using ScriptAtRestServer.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace ScriptAtRestServer.Controllers
 {
@@ -37,7 +37,8 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterScriptModel Model) {
+        public IActionResult Register([FromBody] RegisterScriptModel Model)
+        {
             _logger.LogInformation("Register new script");
 
             try
@@ -123,6 +124,119 @@ namespace ScriptAtRestServer.Controllers
             {
                 _logger.LogError(ex, "Failed to execute script");
                 return BadRequest(new { message = "Failed to execute script" });
+            }
+        }
+
+
+        [HttpGet("type")]
+        public IActionResult GetAllScriptTypes()
+        {
+            _logger.LogInformation("Get all script types");
+            try
+            {
+                var scriptTypes = _scriptService.GetAllTypes();
+                var model = _mapper.Map<IList<ScriptTypeModel>>(scriptTypes);
+                _logger.LogInformation("Script types retrieved : {typesCOunt}", model.Count);
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure whil getting all script types");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpGet("type/{id}")]
+        public async Task<IActionResult> GetScripTypeById(int Id) 
+        {
+            _logger.LogInformation("Get script type with id : {id}" , Id);
+            try
+            {
+                ScriptType scriptType = await _scriptService.GetTypeByIdAsync(Id);
+                var model = _mapper.Map<ScriptTypeModel>(scriptType);
+                _logger.LogInformation("Retrieved script type : {scriptName}", model.Name);
+
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, $"Failed find script type with id {Id}");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Fatal failure while getting script type with id {Id}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpPost("type")]
+        public async Task<IActionResult> RegisterScriptType([FromBody] RegisterScriptTypeModel Model)
+        {
+            _logger.LogInformation("Register new script type");
+            try
+            {
+                ScriptType scriptType = _mapper.Map<ScriptType>(Model);
+                scriptType = await _scriptService.CreateTypeAsync(scriptType);
+
+                ScriptTypeModel scriptTypeModel = _mapper.Map<ScriptTypeModel>(scriptType);
+                _logger.LogInformation("Registered new script type with id : {id}", scriptTypeModel.Id);
+                _logger.LogDebug("New script type : {@scripttype}" , scriptType);
+
+                return Ok(scriptTypeModel);
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, "Failed to register script type");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex , "Fatal failure during script type registration");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpDelete("type/{id}")]
+        public IActionResult DeleteScriptType(int Id)
+        {
+            _logger.LogInformation("Delete script type with id : {id}" , Id);
+            try
+            {
+                _scriptService.DeleteType(Id);
+                _logger.LogInformation("Script type deleted");
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, "Failed to delete script type");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure during scrip type deletion");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
+        [HttpPut("type/{id}")]
+        public async Task<IActionResult> UpdateScriptTypeAsync([FromBody] UpdateScriptTypeModel Model, int Id) {
+            _logger.LogInformation("Update script type with id : {id}" , Id);
+            try
+            {
+                ScriptType scriptType = _mapper.Map<ScriptType>(Model);
+                ScriptType updatedScriptType = await _scriptService.UpdateTypeById(Id, scriptType);
+                return Ok(_mapper.Map<ScriptTypeModel>(updatedScriptType));
+            }
+            catch (AppException ex)
+            {
+                _logger.LogWarning(ex, "Failed to update script type");
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure during scrip type update");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
     }

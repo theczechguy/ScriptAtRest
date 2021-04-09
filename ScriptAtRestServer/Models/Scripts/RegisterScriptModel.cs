@@ -1,3 +1,4 @@
+using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Enums;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,7 +10,7 @@ namespace ScriptAtRestServer.Models.Scripts
         public string Name { get; set; }
 
         [Required]
-        public ScriptEnums.ScriptType Type { get; set; }
+        public int Type { get; set; }
 
         [Required]
         public string EncodedContent { get; set; }

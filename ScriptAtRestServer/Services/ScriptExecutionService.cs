@@ -25,13 +25,16 @@ namespace ScriptAtRestServer.Services
         private ILogger<ScriptExecutionService> _logger;
         private SqLiteDataContext _context;
         protected readonly IConfiguration _configuration;
+        private IScriptService _scriptService;
         public ScriptExecutionService(
-            SqLiteDataContext Context ,
+            SqLiteDataContext Context,
             ILogger<ScriptExecutionService> Logger,
-            IConfiguration Configuration) {
+            IConfiguration Configuration,
+            IScriptService ScriptService) {
             _context = Context;
             _logger = Logger;
             _configuration = Configuration;
+            _scriptService = ScriptService;
         }
 
         public async Task<ProcessModel> RunScriptById(int id , ScriptParamArray paramArray)
@@ -39,23 +42,20 @@ namespace ScriptAtRestServer.Services
             Script script = _context.Scripts.Find(id);
             if (script == null)
             {
-                throw new AppException("Script not found in database");
+                throw new AppException($"Script with id {id} not found in database");
             }
 
-            string scriptContent = script.Content;
-            ScriptEnums.ScriptType scriptType = script.Type;
-                
-            SelectScriptDetails(scriptType, out string scriptSuffix, out string fileName);
+            ScriptType scriptType = await _scriptService.GetTypeByIdAsync(script.Type);
 
-            string scriptFilePath = CreateScriptFileWithContent(scriptContent, scriptSuffix);
-            _logger.LogDebug("Script file : {fullPath}" , scriptFilePath);
+            string scriptFilePath = CreateScriptFileWithContent(script.Content, scriptType.FileExtension);
+
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
-            _logger.LogDebug("Process arguments : {args}" , processArgs);
+            _logger.LogDebug("Process arguments : {args}", processArgs);
 
             try
             {
-                ProcessModel processModel = await RunProcessAsync(processArgs, fileName);
-                _logger.LogDebug("Process result : {@model}" , processModel);
+                ProcessModel processModel = await RunProcessAsync(processArgs, scriptType.Runner);
+                _logger.LogDebug("Process result : {@model}", processModel);
                 return processModel;
             }
             finally {
@@ -64,18 +64,18 @@ namespace ScriptAtRestServer.Services
         }
 
         #region helper methods
-        private string PrepareScriptArguments(ScriptEnums.ScriptType scriptType, string scriptFilePath , ScriptParamArray paramArray) 
+        private string PrepareScriptArguments(ScriptType ScriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
+            _logger.LogDebug("Preparing script arguments");
             StringBuilder stringBuilder = new StringBuilder();
-
-            switch (scriptType)
+            
+            if (ScriptType.ScriptArgument != null)
             {
-                case ScriptEnums.ScriptType.Shell:
-                    stringBuilder.Append(string.Format(" /c {0}" , scriptFilePath)); // /c c:/f/script.cmd
-                    break;
-                case ScriptEnums.ScriptType.PowerShell:
-                    stringBuilder.Append(string.Format(" -f {0}", scriptFilePath)); // -f c:/f/script.ps1
-                    break;
+                stringBuilder.AppendFormat(" {0} {1}", ScriptType.ScriptArgument, scriptFilePath);
+            }
+            else
+            {
+                stringBuilder.AppendFormat(" {0}" , scriptFilePath);
             }
 
             if (paramArray == null)
@@ -94,26 +94,17 @@ namespace ScriptAtRestServer.Services
             return stringBuilder.ToString();
         }
 
-        private void SelectScriptDetails(ScriptEnums.ScriptType scriptType, out string scriptSuffix, out string fileName)
-        {
-            switch (scriptType)
-            {
-                case ScriptEnums.ScriptType.PowerShell:
-                    scriptSuffix = ".ps1";
-                    fileName = "powershell.exe";
-                    break;
-                default:
-                    scriptSuffix = ".cmd";
-                    fileName = "cmd.exe";
-                    break;
-            }
-        }
-
         private string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
         {
             string tempFilePath = Path.GetTempFileName();
+            _logger.LogDebug("New temporary file : {file}", tempFilePath);
+            
             tempFilePath = Path.ChangeExtension(tempFilePath, ScriptSuffix);
+            _logger.LogDebug("Temporary file extension set to : {extension}", ScriptSuffix);
+
             File.WriteAllText(tempFilePath, ScriptContent);
+            _logger.LogDebug("Script content stored in temp file");
+
             return tempFilePath;
         }
 
@@ -132,10 +123,12 @@ namespace ScriptAtRestServer.Services
             }
         }
 
-        private async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
+        private async Task<ProcessModel> RunProcessAsync(string processArgs, string fileName)
         {
             return await Task.Run(() =>
             {
+                _logger.LogDebug("Process runner : {runner}" , fileName);
+
                 using Process process = new Process
                 {
                     StartInfo = new ProcessStartInfo

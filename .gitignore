@@ -1,3 +1,5 @@
 ScriptAtRestServer/bin/
 ScriptAtRestServer/obj/
 ScriptAtRestServer/LocalDatabase.db
+*.db*
+log*.txt

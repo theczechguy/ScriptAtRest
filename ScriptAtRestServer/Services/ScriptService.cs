@@ -6,6 +6,7 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScriptAtRestServer.Services
 {
@@ -15,6 +16,13 @@ namespace ScriptAtRestServer.Services
         IEnumerable<Script> GetAll();
         Script GetById(int id);
         void Delete(int id);
+
+        Task<ScriptType> CreateTypeAsync(ScriptType ScriptType);
+        Task<ScriptType> UpdateTypeAsync(int Id);
+        void DeleteType(int Id);
+        IEnumerable<ScriptType> GetAllTypes();
+        Task<ScriptType> GetTypeByIdAsync(int Id);
+        Task<ScriptType> UpdateTypeById(int Id, ScriptType UpdatedType);
     }
     public class ScriptService : IScriptService
     {
@@ -28,6 +36,11 @@ namespace ScriptAtRestServer.Services
             if (_context.Scripts.Any(x => x.Name == Script.Name))
             {
                 throw new AppException("Scriptname is already taken");
+            }
+
+            if (_context.ScriptTypes.Find(Script.Type) == null)
+            {
+                throw new AppException("Script type is not registered");
             }
 
             _context.Scripts.Add(Script);
@@ -78,6 +91,98 @@ namespace ScriptAtRestServer.Services
                 _context.Scripts.Remove(script);
                 _context.SaveChanges();
             }
+        }
+
+        public async Task<ScriptType> CreateTypeAsync(ScriptType ScriptType) {
+            if (await _context.ScriptTypes.AnyAsync(x => x.Name == ScriptType.Name))
+            {
+                throw new AppException("Scriptname is already taken");
+            }
+
+            _context.ScriptTypes.Add(ScriptType);
+            _ = await _context.SaveChangesAsync();
+
+            return ScriptType;
+        }
+
+        public Task<ScriptType> UpdateTypeAsync(int Id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async void DeleteType(int Id)
+        {
+            ScriptType type = await _context.ScriptTypes.FindAsync(Id);
+            if (type != null)
+            {
+                _ = _context.ScriptTypes.Remove(type);
+                _ = await _context.SaveChangesAsync();
+            }
+            else 
+            {
+                throw new AppException("Script type with requested id not found");
+            }
+        }
+
+        public IEnumerable<ScriptType> GetAllTypes()
+        {
+            return _context.ScriptTypes;
+        }
+
+        public async Task<ScriptType> GetTypeByIdAsync(int Id)
+        {
+            ScriptType type = await _context.ScriptTypes.FindAsync(Id);
+            if (type == null)
+            {
+                throw new AppException("Script type with specified id not found");
+            }
+            return type;
+        }
+
+        public async Task<ScriptType> UpdateTypeById(int Id, ScriptType UpdatedType)
+        {
+            ScriptType currentType = await _context.ScriptTypes.FindAsync(Id);
+            if (currentType == null)
+            {
+                throw new AppException($"Script type with id {Id} not found in database");
+            }
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.FileExtension))
+            {
+                throw new AppException("FileExtension field must not be empty !");
+            }
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.Name))
+            {
+                throw new AppException("Name field must not be empty !");
+            }
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.Runner))
+            {
+                throw new AppException("Runner field must not be empty !");
+            }
+
+            if (string.IsNullOrWhiteSpace(UpdatedType.ScriptArgument))
+            {
+                throw new AppException("ScriptArgument field must not be empty !");
+            }
+            currentType.ScriptArgument = UpdatedType.ScriptArgument;
+            currentType.Runner = UpdatedType.Runner;
+            currentType.FileExtension = UpdatedType.FileExtension;
+
+            if (currentType.Name != UpdatedType.Name)
+            {
+                if (await _context.ScriptTypes.AnyAsync(x => x.Name == UpdatedType.Name))
+                {
+                    throw new AppException("New script type name is already taken !");
+                }
+                currentType.Name = UpdatedType.Name;
+            }
+
+            _context.ScriptTypes.Update(currentType);
+            _ = await _context.SaveChangesAsync();
+
+            return currentType;
         }
     }
 }
