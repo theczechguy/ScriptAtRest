@@ -49,7 +49,7 @@ namespace ScriptAtRestServer.Controllers
                 User newUser = _userService.Create(user, model.Password);
                 UserModel newModel = _mapper.Map<UserModel>(newUser);
                 _logger.LogInformation("User registered with id : {userid}", newModel.Id);
-                return CreatedAtAction(nameof(GetUserByIdAsync), new { newModel.Id }, newModel);
+                return CreatedAtAction(nameof(GetUserByIdAsync), new { Id = newModel.Id }, newModel);
             }
             catch (AppException ex)
             {
@@ -81,12 +81,17 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
-        public async Task<IActionResult> GetUserByIdAsync(int Id) {
+        [HttpGet]
+        [Route("{id}")]
+        [ActionName("GetUserByIdAsync")]
+        public async Task<IActionResult> GetUserByIdAsync(int Id)
+        {
             _logger.LogInformation("Get user with id : {id}", Id);
             try
             {
                 User user = await _userService.GetByIdAsync(Id);
-                return Ok(user);
+                UserModel userModel = _mapper.Map<UserModel>(user);
+                return Ok(userModel);
             }
             catch (AppException ex)
             {
