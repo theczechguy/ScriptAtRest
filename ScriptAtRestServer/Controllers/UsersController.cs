@@ -47,8 +47,9 @@ namespace ScriptAtRestServer.Controllers
             {
                 // create user
                 User newUser = _userService.Create(user, model.Password);
-                _logger.LogInformation("User registered with id : {userid}", newUser.Id);
-                return Ok(new { message = "User registered" });
+                UserModel newModel = _mapper.Map<UserModel>(newUser);
+                _logger.LogInformation("User registered with id : {userid}", newModel.Id);
+                return CreatedAtAction(nameof(GetUserByIdAsync), new { newModel.Id }, newModel);
             }
             catch (AppException ex)
             {
