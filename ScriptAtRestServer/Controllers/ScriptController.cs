@@ -74,10 +74,10 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogInformation("Scripts retrieved : {scriptCount}", model.Count);
                 return Ok(model);
             }
-            catch (AppException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get all scripts");
-                return BadRequest(new { message = "Failed to get all scripts" });
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
 
