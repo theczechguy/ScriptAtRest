@@ -127,6 +127,25 @@ namespace ScriptAtRestServer.Controllers
             }
         }
 
+
+        [HttpGet("type")]
+        public IActionResult GetAllScriptTypes()
+        {
+            _logger.LogInformation("Get all script types");
+            try
+            {
+                var scriptTypes = _scriptService.GetAllTypes();
+                var model = _mapper.Map<IList<ScriptTypeModel>>(scriptTypes);
+                _logger.LogInformation("Script types retrieved : {typesCOunt}", model.Count);
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure whil getting all script types");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
+        }
+
         [HttpPost("type")]
         public async Task<IActionResult> RegisterScriptType([FromBody] RegisterScriptTypeModel Model)
         {
