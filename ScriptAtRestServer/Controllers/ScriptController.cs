@@ -57,6 +57,11 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogError(ex , "Failed to register new script");
                 return BadRequest(new { message = ex.Message });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
         }
 
         [HttpGet]
@@ -69,19 +74,19 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogInformation("Scripts retrieved : {scriptCount}", model.Count);
                 return Ok(model);
             }
-            catch (AppException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get all scripts");
-                return BadRequest(new { message = "Failed to get all scripts" });
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int Id) {
+        public async Task<IActionResult> GetByIdAsync(int Id) {
             _logger.LogInformation("Get Script with id : {scriptid}", Id);
             try
             {
-                var script = _scriptService.GetById(Id);
+                var script = await _scriptService.GetByIdAsync(Id);
                 var model = _mapper.Map<ScriptModel>(script);
                 _logger.LogInformation("Retrieved script : {scriptName}", model.Name);
                 return Ok(model);
@@ -90,6 +95,11 @@ namespace ScriptAtRestServer.Controllers
             {
                 _logger.LogError(ex, "Failed to get script");
                 return BadRequest(new { message = "Failed to get script" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
 
@@ -109,6 +119,11 @@ namespace ScriptAtRestServer.Controllers
                 _logger.LogError(ex, "Failed to delete script");
                 return BadRequest(new { message = "Failed to delete script" });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
         }
 
         [HttpPost("run/{id}")]
@@ -124,6 +139,11 @@ namespace ScriptAtRestServer.Controllers
             {
                 _logger.LogError(ex, "Failed to execute script");
                 return BadRequest(new { message = "Failed to execute script" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
             }
         }
 

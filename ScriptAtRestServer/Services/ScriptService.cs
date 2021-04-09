@@ -14,7 +14,7 @@ namespace ScriptAtRestServer.Services
     public interface IScriptService {
         Script Create(Script Script);
         IEnumerable<Script> GetAll();
-        Script GetById(int id);
+        Task<Script> GetByIdAsync(int Id);
         void Delete(int id);
 
         Task<ScriptType> CreateTypeAsync(ScriptType ScriptType);
@@ -79,8 +79,15 @@ namespace ScriptAtRestServer.Services
             return _context.Scripts;
         }
 
-        public Script GetById(int Id) {
-            return _context.Scripts.Find(Id);
+        public async Task<Script> GetByIdAsync(int Id) {
+            //return _context.Scripts.Find(Id);
+
+            Script type = await _context.Scripts.FindAsync(Id);
+            if (type == null)
+            {
+                throw new AppException("Script type with specified id not found");
+            }
+            return type;
         }
 
         public void Delete(int Id)
@@ -90,6 +97,10 @@ namespace ScriptAtRestServer.Services
             {
                 _context.Scripts.Remove(script);
                 _context.SaveChanges();
+            }
+            else
+            {
+                throw new AppException("Script with requested id not found");
             }
         }
 
