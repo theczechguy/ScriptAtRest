@@ -6,6 +6,7 @@ using ScriptAtRestServer.Entities;
 using ScriptAtRestServer.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScriptAtRestServer.Services
 {
@@ -92,7 +93,7 @@ namespace ScriptAtRestServer.Services
         }
 
         public async Task<ScriptType> CreateTypeAsync(ScriptType ScriptType) {
-            if (_context.ScriptTypes.Any(x => x.Name == ScriptType.Name))
+            if (await _context.ScriptTypes.AnyAsync(x => x.Name == ScriptType.Name))
             {
                 throw new AppException("Scriptname is already taken");
             }
