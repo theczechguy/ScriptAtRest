@@ -93,7 +93,12 @@ namespace ScriptAtRestServer.Controllers
             {
                 _logger.LogError(ex, "Failed to delete user");
                 return BadRequest(new { message = ex.Message });
-            }            
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal failure while deleting user");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Fatal internal error. Please contact administrator" });
+            }
         }
     }
 }
