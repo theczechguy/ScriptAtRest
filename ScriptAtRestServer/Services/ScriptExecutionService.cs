@@ -48,9 +48,9 @@ namespace ScriptAtRestServer.Services
             ScriptType scriptType = await _scriptService.GetTypeByIdAsync(script.Type);
 
             string scriptFilePath = CreateScriptFileWithContent(script.Content, scriptType.FileExtension);
-            _logger.LogDebug("Script file : {fullPath}" , scriptFilePath);
 
             string processArgs = PrepareScriptArguments(scriptType, scriptFilePath, paramArray);
+            _logger.LogDebug("Process arguments : {args}", processArgs);
 
             try
             {
@@ -66,6 +66,7 @@ namespace ScriptAtRestServer.Services
         #region helper methods
         private string PrepareScriptArguments(ScriptType ScriptType, string scriptFilePath , ScriptParamArray paramArray) 
         {
+            _logger.LogDebug("Preparing script arguments");
             StringBuilder stringBuilder = new StringBuilder();
             
             if (ScriptType.ScriptArgument != null)
@@ -96,8 +97,14 @@ namespace ScriptAtRestServer.Services
         private string CreateScriptFileWithContent(string ScriptContent, string ScriptSuffix)
         {
             string tempFilePath = Path.GetTempFileName();
+            _logger.LogDebug("New temporary file : {file}", tempFilePath);
+            
             tempFilePath = Path.ChangeExtension(tempFilePath, ScriptSuffix);
+            _logger.LogDebug("Temporary file extension set to : {extension}", ScriptSuffix);
+
             File.WriteAllText(tempFilePath, ScriptContent);
+            _logger.LogDebug("Script content stored in temp file");
+
             return tempFilePath;
         }
 
@@ -116,12 +123,11 @@ namespace ScriptAtRestServer.Services
             }
         }
 
-        private async Task<ProcessModel> RunProcessAsync(string processArgs , string fileName)
+        private async Task<ProcessModel> RunProcessAsync(string processArgs, string fileName)
         {
             return await Task.Run(() =>
             {
                 _logger.LogDebug("Process runner : {runner}" , fileName);
-                _logger.LogDebug("Process arguments : {args}", processArgs);
 
                 using Process process = new Process
                 {
