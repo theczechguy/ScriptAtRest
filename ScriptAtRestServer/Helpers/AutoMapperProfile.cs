@@ -18,6 +18,7 @@ namespace WebApi.Helpers
 
             CreateMap<ScriptType, ScriptTypeModel>();
             CreateMap<RegisterScriptTypeModel, ScriptType>();
+            CreateMap<UpdateScriptTypeModel, ScriptType>();
         }
     }
 }
