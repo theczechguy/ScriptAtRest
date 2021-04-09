@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using ScriptAtRestServer.Helpers;
-using Microsoft.Extensions.Options;
-using System.Text;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using ScriptAtRestServer.Services;
 using ScriptAtRestServer.Entities;
@@ -37,7 +34,7 @@ namespace ScriptAtRestServer.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody]RegisterModel model)
+        public async Task<IActionResult> RegisterAsync([FromBody]RegisterModel model)
         {
             _logger.LogInformation("Register new user with username : {username}" , model.Username);
             // map model to entity
@@ -46,7 +43,7 @@ namespace ScriptAtRestServer.Controllers
             try
             {
                 // create user
-                User newUser = _userService.Create(user, model.Password);
+                User newUser = await _userService.CreateAsync(user, model.Password);
                 UserModel newModel = _mapper.Map<UserModel>(newUser);
                 _logger.LogInformation("User registered with id : {userid}", newModel.Id);
                 return CreatedAtAction(nameof(GetUserByIdAsync), new { Id = newModel.Id }, newModel);
@@ -107,12 +104,12 @@ namespace ScriptAtRestServer.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int Id)
+        public async Task<IActionResult> DeleteAsync(int Id)
         {
             _logger.LogInformation("Delete user with id : {userid}" , Id);
             try
             {
-                _userService.Delete(Id);
+                await _userService.DeleteAsync(Id);
                 _logger.LogInformation("User deleted");
                 return Ok();
             }

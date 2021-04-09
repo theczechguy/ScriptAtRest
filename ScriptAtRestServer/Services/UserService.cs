@@ -4,6 +4,7 @@ using ScriptAtRestServer.Helpers;
 using ScriptAtRestServer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScriptAtRestServer.Services
 {
@@ -11,8 +12,8 @@ namespace ScriptAtRestServer.Services
     {
         User Authenticate(string username, string password);
         IEnumerable<User> GetAll();
-        User Create(User user, string password);
-        void Delete(int id);
+        Task<User> CreateAsync(User user, string password);
+        Task DeleteAsync(int id);
         Task<User> GetByIdAsync(int Id);
     }
 
@@ -59,13 +60,12 @@ namespace ScriptAtRestServer.Services
             return _context.Users;
         }
 
-        public User Create(User user, string password)
+        public async Task<User> CreateAsync(User user, string password)
         {
-            // validation
             if (string.IsNullOrWhiteSpace(password))
                 throw new AppException("Password is required");
 
-            if (_context.Users.Any(x => x.Username == user.Username))
+            if (await _context.Users.AnyAsync(x => x.Username == user.Username))
                 throw new AppException(string.Format("Username : {0} is already taken" , user.Username));
 
             byte[] passwordHash, passwordSalt;
@@ -75,18 +75,18 @@ namespace ScriptAtRestServer.Services
             user.PasswordSalt = passwordSalt;
 
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return user;
         }
 
-        public void Delete(int Id)
+        public async Task DeleteAsync(int Id)
         {
-            User user = _context.Users.Find(Id);
+            User user = await _context.Users.FindAsync(Id);
             if (user != null)
             {
                 _context.Users.Remove(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             else
             {
