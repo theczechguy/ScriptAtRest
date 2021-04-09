@@ -21,7 +21,7 @@ namespace ScriptAtRestServer.Services
         Task<ScriptType> UpdateTypeAsync(int Id);
         void DeleteType(int Id);
         IEnumerable<ScriptType> GetAllTypes();
-        ScriptType GetTypeByIdAsync(int Id);
+        Task<ScriptType> GetTypeByIdAsync(int Id);
     }
     public class ScriptService : IScriptService
     {
